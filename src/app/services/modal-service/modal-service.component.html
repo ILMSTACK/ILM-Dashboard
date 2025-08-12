@@ -1,0 +1,76 @@
+<div class="w-full max-w-2xl mx-auto p-6">
+    <!-- Icon Section -->
+    <div class="flex flex-col items-center space-y-4">
+      @if(showIcon){
+        <div class="text-center" >
+          <img 
+            [src]="imgIcon" 
+            [class]="iconClass"
+            class="w-16 h-16 object-contain" 
+          />
+        </div>
+      }
+
+
+      <!-- Content Section -->
+      <div class="w-full text-center space-y-3">
+        @if(showTitle){
+          <p 
+         
+          class="text-xl font-semibold "
+        >
+          {{ title }}
+        </p>
+        }
+
+        
+       
+          @if(showDescription){
+            <div 
+            [innerHTML]="description"
+            class="text-base  p-4 rounded-lg"
+            ></div>
+          }
+
+          
+        
+
+        
+      </div>
+
+      <!-- Buttons Section -->
+      <div class="flex items-center justify-center space-x-4 mt-6 w-full">
+        @if(showCancelButton){
+          <button
+          
+          (click)="onNoClick()"
+
+          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+
+          cdkFocusInitial
+        >
+          {{ cancelLabel }}
+        </button>
+        }
+
+        @if(showSubmitButton){
+          <button
+         
+          (click)="onSubmit()"
+
+          class="px-6 py-2.5 rounded-lg text-sm font-medium transition-colors
+                 text-white focus:outline-none focus:ring-2 focus:ring-offset-2"
+          [ngClass]="{
+            'bg-green-600 hover:bg-green-700 focus:ring-green-500': dialogType === 'success',
+            'bg-red-600 hover:bg-red-700 focus:ring-red-500': dialogType === 'alert',
+            'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500': dialogType === 'confirm'
+          }"
+          cdkFocusInitial
+        >
+          {{ successLabel }}
+        </button>
+        } 
+        
+      </div>
+    </div>
+  </div>

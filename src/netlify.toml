@@ -1,0 +1,26 @@
+# Global build settings
+[build]
+  publish = "dist/ILM_DASHBOARD/browser"
+  command = "npm run build:staging"
+
+# Production context (when merging to main/master branch)
+[context.production]
+  command = "npm run build:production"
+
+# Deploy Preview context (for PRs)
+[context.deploy-preview]
+  command = "npm run build:staging"
+
+# Branch deploy context (non-production branches)
+[context.staging]
+  command = "npm run build:staging"
+
+# Specific branch (e.g., staging branch)
+[context.staging]
+  command = "npm run build:staging"
+
+# Default redirect for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

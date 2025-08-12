@@ -1,0 +1,262 @@
+<!-- Main Dashboard Layout -->
+<div class="flex h-screen bg-gray-50 overflow-hidden">
+  
+  <!-- Left Sidebar -->
+  <div class="flex flex-col transition-all duration-300 ease-in-out bg-white shadow-lg md:shadow-none fixed md:relative inset-y-0 left-0 z-30 md:z-auto"
+       [ngClass]="{
+         'w-64 translate-x-0': sidebarOpen(),
+         'w-64 -translate-x-full md:w-16 md:translate-x-0': !sidebarOpen()
+       }">
+    
+    <!-- Sidebar Header -->
+    <div class="flex items-center justify-between h-16 px-4 bg-white shadow-sm border-r border-gray-200">
+      <div class="flex items-center space-x-3" *ngIf="sidebarOpen()">
+        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <mat-icon class="text-white text-lg">dashboard</mat-icon>
+        </div>
+        <h1 class="text-xl font-bold text-gray-900 truncate">ILM Dashboard</h1>
+      </div>
+      
+      <div class="flex items-center justify-center w-full" *ngIf="!sidebarOpen()">
+        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <mat-icon class="text-white text-lg">dashboard</mat-icon>
+        </div>
+      </div>
+      
+      <button 
+        mat-icon-button 
+        (click)="toggleSidebar()"
+        class="text-gray-500 hover:text-gray-700 transition-colors duration-200 flex-shrink-0"
+        [ngClass]="{'ml-2': sidebarOpen()}"
+        [matTooltip]="sidebarOpen() ? 'Collapse sidebar' : 'Expand sidebar'">
+        <mat-icon>{{ sidebarOpen() ? 'menu_open' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+    
+    <!-- Navigation Menu -->
+    <nav class="flex-1 bg-white border-r border-gray-200 px-2 py-4 space-y-2 overflow-y-auto">
+      <div *ngFor="let item of navigationItems" class="relative">
+        <a 
+          [routerLink]="item.route"
+          [class]="isRouteActive(item.route) 
+            ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-r-2 border-blue-500 text-blue-700' 
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+          class="group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out cursor-pointer"
+          matRipple>
+          
+          <!-- Icon -->
+          <mat-icon 
+            [class]="isRouteActive(item.route) ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'"
+            class="mr-3 flex-shrink-0 text-lg transition-colors duration-200">
+            {{ item.icon }}
+          </mat-icon>
+          
+          <!-- Navigation Label -->
+          <div class="flex-1 min-w-0 transition-all duration-300 ease-in-out" 
+               [ngClass]="{'opacity-0 w-0': !sidebarOpen(), 'opacity-100 w-auto': sidebarOpen()}">
+            <span class="text-sm font-medium truncate block">{{ item.name }}</span>
+            <span class="text-xs text-gray-500 truncate block mt-0.5">{{ item.description }}</span>
+          </div>
+          
+          <!-- Active Indicator -->
+          <div *ngIf="isRouteActive(item.route) && sidebarOpen()" 
+               class="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 ml-2"></div>
+        </a>
+      </div>
+    </nav>
+    
+    <!-- Sidebar Footer -->
+    <div class="bg-white border-r border-gray-200 p-4 border-t">
+      <div class="flex items-center space-x-3" *ngIf="sidebarOpen()">
+        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+          <mat-icon class="text-gray-600 text-sm">person</mat-icon>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 truncate">Developer</p>
+          <p class="text-xs text-gray-500 truncate">Admin User</p>
+        </div>
+      </div>
+      
+      <div class="flex justify-center" *ngIf="!sidebarOpen()">
+        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+          <mat-icon class="text-gray-600 text-sm">person</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    
+    <!-- Top Header Bar -->
+    <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <!-- Mobile Menu Button -->
+          <button 
+            mat-icon-button 
+            (click)="toggleSidebar()" 
+            class="md:hidden text-gray-500 hover:text-gray-700">
+            <mat-icon>menu</mat-icon>
+          </button>
+          
+          <!-- Page Title -->
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 capitalize">
+              {{ router.url.split('/').pop() || 'Dashboard' }}
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">
+              Example. boleh delete nanti
+            </p>
+          </div>
+        </div>
+        
+        <!-- Header Actions -->
+        <div class="flex items-center space-x-4">
+          <button 
+            mat-icon-button 
+            class="text-gray-400 hover:text-gray-500"
+            matTooltip="Notifications">
+            <mat-icon>notifications</mat-icon>
+          </button>
+          
+          <button 
+            mat-icon-button 
+            class="text-gray-400 hover:text-gray-500"
+            matTooltip="Settings">
+            <mat-icon>settings</mat-icon>
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto bg-gray-50">
+      <div class="p-6">
+        
+        <!-- Dashboard API Testing Section (Only show when on dashboard route) -->
+        <div *ngIf="isRouteActive('dashboard')">
+          
+          <!-- API Testing Card -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-4">
+                  <mat-icon class="text-white text-lg">api</mat-icon>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">some of codebase features yang boleh follow, can try auth and store too</h3>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6">
+              <!-- API Test Buttons Grid -->
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                
+                <!-- Find All Button -->
+                <button 
+                  mat-raised-button 
+                  color="primary"
+                  (click)="testFindAll()"
+                  [disabled]="isLoadingFindAll()"
+                  class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+                  <mat-spinner diameter="20" *ngIf="isLoadingFindAll()"></mat-spinner>
+                  <mat-icon *ngIf="!isLoadingFindAll()">list</mat-icon>
+                  <span class="font-medium">Find All</span>
+                </button>
+                
+                <!-- Find By ID Button -->
+                <button 
+                  mat-raised-button 
+                  color="primary"
+                  (click)="testFindById()"
+                  [disabled]="isLoadingFindById()"
+                  class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+                  <mat-spinner diameter="20" *ngIf="isLoadingFindById()"></mat-spinner>
+                  <mat-icon *ngIf="!isLoadingFindById()">search</mat-icon>
+                  <span class="font-medium">Find By ID</span>
+                </button>
+                
+                <!-- Create Button -->
+                <button 
+                  mat-raised-button 
+                  color="accent"
+                  (click)="testCreate()"
+                  [disabled]="isLoadingCreate()"
+                  class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+                  <mat-spinner diameter="20" *ngIf="isLoadingCreate()"></mat-spinner>
+                  <mat-icon *ngIf="!isLoadingCreate()">add</mat-icon>
+                  <span class="font-medium">Create</span>
+                </button>
+                
+                <!-- Update Button -->
+                <button 
+                  mat-raised-button 
+                  color="accent"
+                  (click)="testUpdate()"
+                  [disabled]="isLoadingUpdate()"
+                  class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+                  <mat-spinner diameter="20" *ngIf="isLoadingUpdate()"></mat-spinner>
+                  <mat-icon *ngIf="!isLoadingUpdate()">edit</mat-icon>
+                  <span class="font-medium">Update</span>
+                </button>
+                
+                <!-- Delete Button -->
+                <button 
+                  mat-raised-button 
+                  color="warn"
+                  (click)="testDelete()"
+                  [disabled]="isLoadingDelete()"
+                  class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+                  <mat-spinner diameter="20" *ngIf="isLoadingDelete()"></mat-spinner>
+                  <mat-icon *ngIf="!isLoadingDelete()">delete</mat-icon>
+                  <span class="font-medium">Delete</span>
+                </button>
+                
+                <!-- Search Button -->
+                <button 
+                  mat-raised-button 
+                  color="primary"
+                  (click)="testSearch()"
+                  [disabled]="isLoadingSearch()"
+                  class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+                  <mat-spinner diameter="20" *ngIf="isLoadingSearch()"></mat-spinner>
+                  <mat-icon *ngIf="!isLoadingSearch()">manage_search</mat-icon>
+                  <span class="font-medium">Search</span>
+                </button>
+                
+                <!-- Modal Test Button -->
+                <button 
+                  mat-raised-button 
+                  style="background: linear-gradient(45deg, #9c27b0, #673ab7); color: white;"
+                  (click)="testModal()"
+                  [disabled]="isLoadingModal()"
+                  class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+                  <mat-spinner diameter="20" *ngIf="isLoadingModal()"></mat-spinner>
+                  <mat-icon *ngIf="!isLoadingModal()">open_in_new</mat-icon>
+                  <span class="font-medium">Test Modal</span>
+                </button>
+                
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Router Outlet for Child Components (Example 1 & Example 2) -->
+        <div *ngIf="!isRouteActive('dashboard')" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <router-outlet></router-outlet>
+        </div>
+        
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Mobile Sidebar Overlay -->
+<div 
+  *ngIf="sidebarOpen()" 
+  class="fixed inset-0 bg-gray-600 bg-opacity-50 md:hidden z-20"
+  (click)="toggleSidebar()">
+</div>

@@ -1,0 +1,125 @@
+// Enhanced styles for auth component
+
+// Remove the spinner from number inputs
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+// Focus styles
+input:focus {
+  outline: none;
+  border-color: #10b981; // emerald-500
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+}
+
+// Disabled input styling
+input:disabled {
+  background-color: #f3f4f6; // gray-100
+  cursor: not-allowed;
+}
+
+// Button styles
+button {
+  transition: all 0.2s ease;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Error message styling
+.error-message {
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  background-color: #fef2f2; // red-50
+  border: 1px solid #fee2e2; // red-100
+  color: #ef4444; // red-500
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+// Form field focus styles
+.form-field:focus-within {
+  label {
+    color: #10b981; // emerald-500
+  }
+}
+
+// Smooth transitions
+.form-transition {
+  transition: all 0.3s ease;
+}
+
+// Loading state for buttons
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+  
+  &:after {
+    content: '';
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    top: calc(50% - 0.5rem);
+    right: 1rem;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: white;
+    border-right-color: white;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// OTP resend link
+.resend-link {
+  color: #10b981; // emerald-500
+  cursor: pointer;
+  
+  &:hover {
+    color: #047857; // emerald-700
+    text-decoration: underline;
+  }
+}
+
+// Dialog overlay (if needed for styling the Modal backdrop)
+::ng-deep .mat-dialog-container {
+  padding: 0 !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+}
+
+::ng-deep .cdk-overlay-dark-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+// Added styles for mobile responsiveness
+@media (max-width: 640px) {
+  // Ensure the dialog doesn't stretch too wide on small screens
+  ::ng-deep .mat-dialog-container {
+    max-width: 90vw !important;
+  }
+  
+  // Make buttons easier to tap on mobile
+  button {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+}

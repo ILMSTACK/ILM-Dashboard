@@ -1,0 +1,131 @@
+<!-- Enhanced Auth Component Template -->
+<div class="bg-white rounded-lg shadow-lg w-full max-w-md">
+  <!-- Header with close button -->
+  <div class="relative p-6 pb-0">
+    <p class="text-gray-500 mt-2">Login With Mobile Number</p>
+    <button (click)="close()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Timer (if needed) -->
+  <!-- <div *ngIf="timeLeft > 0" class="px-6 py-2">
+    <div class="text-sm text-gray-500 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      Session expires in {{ timeLeft }} seconds
+    </div>
+  </div> -->
+
+  <form [formGroup]="loginForm" class="p-6 pt-4">
+    <div class="space-y-4">
+      <!-- Mobile Number Field -->
+      <div class="space-y-2">
+        <label for="mobileNo" class="block text-sm font-medium text-gray-700">Mobile Number</label>
+        <div class="flex items-center">
+          <input
+            id="mobileNo"
+            type="tel"
+            formControlName="mobileNo"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="12"
+            class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+            placeholder="60123456789"
+            [disabled]="otpSent"
+          />
+        </div>
+        <div *ngIf="f['mobileNo'].touched && f['mobileNo'].invalid" class="text-red-500 text-sm mt-1">
+          <div *ngIf="f['mobileNo'].errors?.['required']">
+            Mobile number is required
+          </div>
+          <div *ngIf="f['mobileNo'].errors?.['pattern']">
+            Invalid mobile number format
+          </div>
+        </div>
+      </div>
+
+      <!-- OTP Field (Shown After Sending OTP) -->
+      <div *ngIf="otpSent" class="space-y-2">
+        <label for="otp" class="block text-sm font-medium text-gray-700">OTP</label>
+        <div class="relative">
+          <input
+            id="otp"
+            type="number"
+            formControlName="otp"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="6"
+            class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+            placeholder="Enter 6-digit OTP"
+          />
+        </div>
+        <div *ngIf="f['otp'].touched && f['otp'].invalid" class="text-red-500 text-sm mt-1">
+          <div *ngIf="f['otp'].errors?.['required']">
+            OTP is required
+          </div>
+          <div *ngIf="f['otp'].errors?.['pattern']">
+            OTP must be 6 digits
+          </div>
+        </div>
+        
+        <!-- Resend OTP Section -->
+        <div class="text-sm text-gray-500 mt-2">
+          <ng-container *ngIf="timeLeft > 0">
+            Resend OTP in {{ timeLeft }} seconds
+          </ng-container>
+          <button 
+            *ngIf="timeLeft === 0" 
+            type="button" 
+            (click)="sendOtpNo()" 
+            class="text-emerald-600 hover:text-emerald-800"
+          >
+            Resend OTP
+          </button>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-3">
+        <span class="text-sm text-red-600">{{ errorMessage }}</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-3 pt-2">
+        <button 
+          type="button" 
+          (click)="close()" 
+          class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Cancel
+        </button>
+
+        <!-- Show "Send OTP" Button Initially, "Verify OTP" Button After OTP Sent -->
+        <ng-container *ngIf="!otpSent">
+          <button 
+            type="button" 
+            (click)="sendOtpNo()" 
+            [disabled]="f['mobileNo'].invalid"
+            class="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Send OTP
+          </button>
+        </ng-container>
+        
+        <ng-container *ngIf="otpSent">
+          <button 
+            type="button" 
+            (click)="verifyOtp()" 
+            [disabled]="f['otp'].invalid"
+            class="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Verify OTP
+          </button>
+        </ng-container>
+      </div>
+    </div>
+  </form>
+</div>

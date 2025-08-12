@@ -1,0 +1,49 @@
+.success-message {
+    p {
+      border-radius: 4px;
+      border: 1px solid #008000;
+      padding: 10px;
+      background: #00800014;
+      height: fit-content;
+    }
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 582px;
+  }
+  
+  // Updated button styles
+  button {
+    &.btn-primary {
+      background-color: #2B73C2 !important;
+      color: white !important;
+    }
+    
+    &.btn-dark {
+      background-color: red !important;
+      color: white !important;
+    }
+  }
+  .center-content {
+    text-align: center;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  @media only screen and (max-width: 660px) {
+    p {
+      font-size: smaller;
+    }
+  
+    .success-message {
+      width: 280px;
+      p {
+        border-radius: 4px;
+        border: 1px solid #008000;
+        padding: 8px;
+        background: #00800014;
+        height: fit-content;
+      }
+    }
+  }

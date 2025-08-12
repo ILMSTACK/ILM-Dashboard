@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import 'swiper/scss';
+@import 'swiper/scss/navigation';
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+  }
+// In styles.scss or _global.scss
+
+// ======================================
+// VARIABLES 
+// ======================================
+$font-family-sans: 'Nunito', sans-serif;
+$letter-spacing-sm: 0.02em;
+$emerald-500: #10b981;
+$emerald-600: #0e9f6e;
+$sky-500: #0ea5e9;
+$text-dark: #222222; // Consider if Tailwind's text colors are sufficient
+$gray-100: #f1f1f1;
+$white: #ffffff;
+$spacing-xs: 2px;
+$spacing-sm: 4px;
+$spacing-md: 6px;
+$spacing-lg: 10px;
+$transition-duration-short: 0.2s;
+$transition-duration-medium: 0.3s;
+$transition-timing-default: ease-in-out;
+
+// ======================================
+// TYPOGRAPHY (Global Base)
+// ======================================
+
+.header {
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+  color: #222222;
+}
+
+// Text selection color
+::selection {
+  background-color: rgba($emerald-500, 0.3);
+}
+
+// ======================================
+// UTILITIES (Global)
+// ======================================
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  &::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+}
+
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: $spacing-md;
+    height: $spacing-md;
+  }
+  &::-webkit-scrollbar-track {
+    background: $gray-100;
+    border-radius: $spacing-lg;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $emerald-500;
+    border-radius: $spacing-lg;
+    &:hover {
+      background: $emerald-600;
+    }
+  }
+}
+
+// Custom focus styles for accessibility
+:focus-visible {
+  outline: $spacing-xs solid $emerald-500;
+  outline-offset: $spacing-xs;
+}
+
+// ======================================
+// GLOBAL TRANSITIONS (Apply to common elements)
+// ======================================
+button, a {
+  // Keep if you want a universal base transition, Tailwind also provides transition utilities
+  // transition: all $transition-duration-short $transition-timing-default;
+
+  &:active {
+    transform: scale(0.98); // Be mindful if Tailwind provides this too
+  }
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+// ======================================
+// RESPONSIVE STYLES (Global)
+// ======================================
+@media (max-width: 768px) { // Corresponds to Tailwind's `md` breakpoint
+  // Apply a gradient background to the main site header on mobile
+  // Ensure this targets your *actual* main site header element, e.g. app-header > header
+  body > app-root > app-layout > header, // Example selector, adjust to your structure
+  body > app-root > app-home > header { // Or if header is directly in home for this specific case
+    background: linear-gradient(to right, $emerald-500, $sky-500);
+  }
+}
