@@ -1,4 +1,7 @@
-# KLBRICKFIELDFE
+# ILMDASHBOARD
+Install npm version 20+
+Run - "npm install"
+Run - "npm start"
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.7.
 
