@@ -1,1 +1,110 @@
-<p>example-nav works!</p>
+<!-- API Testing Section -->
+<div class="p-6">
+  
+  <!-- API Testing Card -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+    <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+      <div class="flex items-center">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-4">
+          <mat-icon class="text-white text-lg">api</mat-icon>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">API Testing Features</h3>
+          <p class="text-sm text-gray-600 mt-1">Test the codebase features - Auth and Store services available too</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <!-- API Test Buttons Grid -->
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        
+        <!-- Find All Button -->
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="testFindAll()"
+          [disabled]="isLoadingFindAll()"
+          class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+          <mat-spinner diameter="20" *ngIf="isLoadingFindAll()"></mat-spinner>
+          <mat-icon *ngIf="!isLoadingFindAll()">list</mat-icon>
+          <span class="font-medium">Find All</span>
+        </button>
+        
+        <!-- Find By ID Button -->
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="testFindById()"
+          [disabled]="isLoadingFindById()"
+          class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+          <mat-spinner diameter="20" *ngIf="isLoadingFindById()"></mat-spinner>
+          <mat-icon *ngIf="!isLoadingFindById()">search</mat-icon>
+          <span class="font-medium">Find By ID</span>
+        </button>
+        
+        <!-- Create Button -->
+        <button 
+          mat-raised-button 
+          color="accent"
+          (click)="testCreate()"
+          [disabled]="isLoadingCreate()"
+          class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+          <mat-spinner diameter="20" *ngIf="isLoadingCreate()"></mat-spinner>
+          <mat-icon *ngIf="!isLoadingCreate()">add</mat-icon>
+          <span class="font-medium">Create</span>
+        </button>
+        
+        <!-- Update Button -->
+        <button 
+          mat-raised-button 
+          color="accent"
+          (click)="testUpdate()"
+          [disabled]="isLoadingUpdate()"
+          class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+          <mat-spinner diameter="20" *ngIf="isLoadingUpdate()"></mat-spinner>
+          <mat-icon *ngIf="!isLoadingUpdate()">edit</mat-icon>
+          <span class="font-medium">Update</span>
+        </button>
+        
+        <!-- Delete Button -->
+        <button 
+          mat-raised-button 
+          color="warn"
+          (click)="testDelete()"
+          [disabled]="isLoadingDelete()"
+          class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+          <mat-spinner diameter="20" *ngIf="isLoadingDelete()"></mat-spinner>
+          <mat-icon *ngIf="!isLoadingDelete()">delete</mat-icon>
+          <span class="font-medium">Delete</span>
+        </button>
+        
+        <!-- Search Button -->
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="testSearch()"
+          [disabled]="isLoadingSearch()"
+          class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+          <mat-spinner diameter="20" *ngIf="isLoadingSearch()"></mat-spinner>
+          <mat-icon *ngIf="!isLoadingSearch()">manage_search</mat-icon>
+          <span class="font-medium">Search</span>
+        </button>
+        
+        <!-- Modal Test Button -->
+        <button 
+          mat-raised-button 
+          style="background: linear-gradient(45deg, #9c27b0, #673ab7); color: white;"
+          (click)="testModal()"
+          [disabled]="isLoadingModal()"
+          class="h-14 flex items-center justify-center space-x-2 transition-all duration-200 hover:shadow-lg">
+          <mat-spinner diameter="20" *ngIf="isLoadingModal()"></mat-spinner>
+          <mat-icon *ngIf="!isLoadingModal()">open_in_new</mat-icon>
+          <span class="font-medium">Test Modal</span>
+        </button>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>

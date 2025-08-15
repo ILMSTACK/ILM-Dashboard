@@ -1,0 +1,127 @@
+// BI Dashboard Home Component Styles
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+.metric-card {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.progress-bar {
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Custom chart placeholder styles
+.chart-placeholder {
+  background: linear-gradient(135deg, 
+              rgba(59, 130, 246, 0.05) 0%, 
+              rgba(99, 102, 241, 0.05) 100%);
+  border: 2px dashed rgba(59, 130, 246, 0.2);
+  border-radius: 0.5rem;
+  
+  &.line-chart {
+    background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.05) 0%, 
+                rgba(99, 102, 241, 0.05) 100%);
+  }
+  
+  &.pie-chart {
+    background: linear-gradient(135deg, 
+                rgba(139, 92, 246, 0.05) 0%, 
+                rgba(168, 85, 247, 0.05) 100%);
+    border-color: rgba(139, 92, 246, 0.2);
+  }
+  
+  &.bar-chart {
+    background: linear-gradient(135deg, 
+                rgba(16, 185, 129, 0.05) 0%, 
+                rgba(5, 150, 105, 0.05) 100%);
+    border-color: rgba(16, 185, 129, 0.2);
+  }
+}
+
+// Responsive grid adjustments
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-container {
+    height: 250px;
+  }
+}
+
+// Alert severity indicator animations
+.alert-item {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateX(4px);
+  }
+  
+  &.high-severity {
+    border-left: 4px solid #EF4444;
+  }
+  
+  &.medium-severity {
+    border-left: 4px solid #F59E0B;
+  }
+  
+  &.low-severity {
+    border-left: 4px solid #3B82F6;
+  }
+}
+
+// KPI card animations
+.kpi-value {
+  font-variant-numeric: tabular-nums;
+  transition: all 0.3s ease;
+}
+
+// Insight cards
+.insight-card {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Chart integration styles for future use
+:host ::ng-deep {
+  .chart-js-container {
+    canvas {
+      max-height: 300px !important;
+    }
+  }
+  
+  // Material form field customizations
+  .mat-mdc-form-field {
+    .mdc-text-field--outlined {
+      .mdc-notched-outline {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: rgba(99, 102, 241, 0.2);
+        }
+      }
+      
+      &:hover .mdc-notched-outline {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: rgba(99, 102, 241, 0.4);
+        }
+      }
+    }
+  }
+}

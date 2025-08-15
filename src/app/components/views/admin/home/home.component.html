@@ -1,0 +1,153 @@
+<!-- BI Analytics Dashboard -->
+<div class="p-6 space-y-6">
+  
+  <!-- Dashboard Header with Controls -->
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+    <div class="flex items-center">
+      <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+        <mat-icon class="text-white text-xl">analytics</mat-icon>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">ILM Analytics Dashboard</h1>
+        <p class="text-gray-600 mt-1">Business Intelligence & Data Insights</p>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Key Performance Indicators -->
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div *ngFor="let metric of totalPercentageChange(); trackBy: trackByMetricId" 
+         class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+      
+      <div class="p-6">
+        <!-- Metric Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div [class]="'w-12 h-12 rounded-lg flex items-center justify-center ' + metric.bgColor">
+            <mat-icon class="text-white">{{ metric.icon }}</mat-icon>
+          </div>
+          <div [class]="'flex items-center text-sm font-medium ' + (metric.isPositive ? 'text-green-600' : 'text-red-600')">
+            <mat-icon class="text-xs mr-1">{{ metric.isPositive ? 'trending_up' : 'trending_down' }}</mat-icon>
+            <span>{{ metric.percentageChange.toFixed(1) }}%</span>
+          </div>
+        </div>
+        
+        <!-- Metric Value -->
+        <div class="space-y-1">
+          <h3 class="text-sm font-medium text-gray-600">{{ metric.title }}</h3>
+          <p class="text-2xl font-bold text-gray-900">
+            {{ formatNumber(metric.value, metric.unit) }}
+          </p>
+          <p class="text-xs text-gray-500">
+            Previous: {{ formatNumber(metric.previousValue, metric.unit) }}
+          </p>
+        </div>
+      </div>
+      
+      <!-- Progress Bar -->
+      <div class="px-6 pb-4">
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div [class]="'h-2 rounded-full transition-all duration-500 ' + (metric.isPositive ? 'bg-green-500' : 'bg-red-500')" 
+               [style.width.%]="Math.min(Math.abs(metric.percentageChange) * 10, 100)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts and Analytics Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    
+    <!-- Data Growth Trend Chart -->
+    <div class="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Data Growth Trend</h3>
+        <p class="text-sm text-gray-600 mt-1">Daily data ingestion and growth metrics</p>
+      </div>
+      <div class="p-6">
+        <!-- Chart Placeholder - Replace with actual chart library -->
+        <div class="h-80 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center border-2 border-dashed border-blue-200">
+          <div class="text-center">
+            <mat-icon class="text-blue-400 text-4xl mb-2">show_chart</mat-icon>
+            <p class="text-blue-600 font-medium">Line Chart: Data Growth Over Time</p>
+            <p class="text-blue-500 text-sm mt-1">Chart.js or similar library integration needed</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Score Breakdown -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Compliance by Regulation</h3>
+        <p class="text-sm text-gray-600 mt-1">Regulatory compliance scores</p>
+      </div>
+      <div class="p-6">
+        <!-- Compliance Items -->
+        <div class="space-y-4">
+          <div *ngFor="let item of complianceByCategory()" class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-3 h-3 rounded-full" [style.background-color]="item.color"></div>
+              <span class="text-sm font-medium text-gray-700">{{ item.category }}</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="w-20 bg-gray-200 rounded-full h-2">
+                <div class="h-2 rounded-full transition-all duration-500" 
+                     [style.background-color]="item.color"
+                     [style.width.%]="item.value"></div>
+              </div>
+              <span class="text-sm font-semibold text-gray-900 w-10">{{ item.value }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+  <!-- Performance Insights -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Performance Insights</h3>
+          <p class="text-sm text-gray-600 mt-1">AI-powered recommendations and insights</p>
+        </div>
+        <mat-icon class="text-gray-400">lightbulb</mat-icon>
+      </div>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Insight 1 -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div class="flex items-center space-x-2 mb-2">
+            <mat-icon class="text-blue-600 text-sm">trending_up</mat-icon>
+            <span class="text-sm font-medium text-blue-800">Growth Prediction</span>
+          </div>
+          <p class="text-sm text-blue-700">Data volume expected to increase by 24% next quarter based on current trends.</p>
+        </div>
+        
+        <!-- Insight 2 -->
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div class="flex items-center space-x-2 mb-2">
+            <mat-icon class="text-green-600 text-sm">savings</mat-icon>
+            <span class="text-sm font-medium text-green-800">Cost Optimization</span>
+          </div>
+          <p class="text-sm text-green-700">Archive 2.3TB of cold data to reduce storage costs by $12K annually.</p>
+        </div>
+        
+        <!-- Insight 3 -->
+        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <div class="flex items-center space-x-2 mb-2">
+            <mat-icon class="text-orange-600 text-sm">security</mat-icon>
+            <span class="text-sm font-medium text-orange-800">Compliance Alert</span>
+          </div>
+          <p class="text-sm text-orange-700">5 policies require review to maintain GDPR compliance standards.</p>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+</div>
