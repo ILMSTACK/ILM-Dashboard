@@ -9,14 +9,14 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   const apiKey = environment.API_KEY;
   
   // Always add the API key
-  let headers = req.headers.set('X-API-Key', apiKey);
+  //let headers = req.headers.set('X-API-Key', apiKey);
   
   // Get token from store
-  const token = globalStore.getValue('token');
-  if (token) {
-    headers = headers.set('Authorization', `Bearer ${token}`);
-  }
+  // const token = globalStore.getValue('token');
+  // if (token) {
+  //   headers = headers.set('Authorization', `Bearer ${token}`);
+  // }
   
-  const cloned = req.clone({ headers });
-  return next(cloned);
+  // const cloned = req.clone({ headers });
+  return next(req);
 };
