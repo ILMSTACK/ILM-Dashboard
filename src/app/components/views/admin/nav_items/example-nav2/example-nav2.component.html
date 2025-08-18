@@ -1,1 +1,666 @@
-<p>example-nav2 works!</p>
+<div class="premium-automation-container">
+  <!-- Premium Header Section -->
+  <div class="premium-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="premium-title">
+          <span class="title-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+              <path d="M19 15L20.09 17.26L23 18L20.09 18.74L19 21L17.91 18.74L15 18L17.91 17.26L19 15Z" fill="currentColor"/>
+              <path d="M5 15L6.09 17.26L9 18L6.09 18.74L5 21L3.91 18.74L1 18L3.91 17.26L5 15Z" fill="currentColor"/>
+            </svg>
+          </span>
+          AI Business Automation
+        </h1>
+        <p class="premium-subtitle">
+          Transform user stories into comprehensive development roadmaps with intelligent task generation and test case automation
+        </p>
+      </div>
+      <div class="header-stats" *ngIf="userStoryHistory.length > 0">
+        <div class="stat-card">
+          <div class="stat-number">{{ userStoryHistory.length }}</div>
+          <div class="stat-label">Stories Created</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ getTotalTasks() }}</div>
+          <div class="stat-label">Tasks Generated</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ getTotalTestCases() }}</div>
+          <div class="stat-label">Test Cases</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Premium Navigation -->
+  <div class="premium-nav">
+    <div class="nav-container">
+      <button 
+        class="nav-button" 
+        [class.active]="currentView === 'create'"
+        (click)="showCreateView()">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4V20M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="nav-text">Create Story</span>
+        <span class="nav-description">Generate new automation</span>
+      </button>
+      
+      <button 
+        class="nav-button" 
+        [class.active]="currentView === 'history'"
+        (click)="showHistoryView()">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 3V21L9 18L15 21L21 18V3L15 6L9 3L3 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="nav-text">Project History</span>
+        <span class="nav-description">Browse & analyze</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Premium Alert Messages -->
+  <div class="premium-alerts" *ngIf="successMessage || errorMessage">
+    <div class="alert premium-success" *ngIf="successMessage">
+      <div class="alert-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="alert-content">
+        <div class="alert-title">Success!</div>
+        <div class="alert-message">{{ successMessage }}</div>
+      </div>
+    </div>
+    
+    <div class="alert premium-error" *ngIf="errorMessage">
+      <div class="alert-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 8V16M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM12 8H12.01V8.01H12V8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="alert-content">
+        <div class="alert-title">Attention Required</div>
+        <div class="alert-message">{{ errorMessage }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create User Story View -->
+  <div class="premium-content" *ngIf="currentView === 'create'">
+    <div class="premium-card main-card">
+      <div class="card-header-premium">
+        <div class="header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="header-content-premium">
+          <h2>Create User Story</h2>
+          <p>Transform your requirements into actionable development plans</p>
+        </div>
+      </div>
+      
+      <div class="card-body-premium">
+        <form (ngSubmit)="createUserStory()" #userStoryForm="ngForm" class="premium-form">
+          <div class="form-section">
+            <div class="form-group-premium">
+              <label class="premium-label">
+                <span class="label-text">Project Title</span>
+                <span class="label-required">*</span>
+              </label>
+              <div class="input-container">
+                <input
+                  type="text"
+                  class="premium-input"
+                  [(ngModel)]="userStoryTitle"
+                  name="userStoryTitle"
+                  placeholder="Enter a descriptive title for your user story"
+                  required>
+                <div class="input-focus-border"></div>
+              </div>
+            </div>
+
+            <div class="form-group-premium">
+              <label class="premium-label">
+                <span class="label-text">User Story Requirements</span>
+                <span class="label-required">*</span>
+              </label>
+              <div class="textarea-container">
+                <textarea
+                  class="premium-textarea"
+                  [(ngModel)]="userStoryContent"
+                  name="userStoryContent"
+                  rows="6"
+                  placeholder="As a [user type], I want [goal] so that [benefit]..."
+                  required></textarea>
+                <div class="textarea-focus-border"></div>
+              </div>
+              <div class="form-hint">
+                <div class="hint-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <span>Example: "As a mobile app user, I want to receive push notifications for important updates, customize notification preferences, sync data across devices, and work offline with automatic sync when connection is restored, so that I can stay productive anywhere."</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions-premium">
+            <button 
+              type="button" 
+              class="btn-secondary-premium"
+              (click)="resetForm()"
+              [disabled]="isLoading">
+              <span class="btn-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12M21 12L18 9M21 12L18 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              Reset Form
+            </button>
+            
+            <button 
+              type="submit" 
+              class="btn-primary-premium"
+              [disabled]="isLoading || !userStoryForm.valid">
+              <span *ngIf="isLoading" class="loading-spinner"></span>
+              <span *ngIf="!isLoading" class="btn-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                </svg>
+              </span>
+              <span class="btn-text">
+                {{ isLoading ? 'AI Processing...' : 'Generate with AI' }}
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- History View -->
+  <div class="premium-content" *ngIf="currentView === 'history'">
+    <div class="premium-card">
+      <div class="card-header-premium">
+        <div class="header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 3V21L9 18L15 21L21 18V3L15 6L9 3L3 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="header-content-premium">
+          <h2>Project History</h2>
+          <p>Browse and analyze your user stories and generated automation</p>
+        </div>
+        
+        <!-- Premium Search -->
+        <div class="search-container-premium">
+          <div class="search-input-group">
+            <div class="search-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 21L15 15L21 21ZM17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <input
+              type="text"
+              class="search-input"
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="searchUserStories()"
+              placeholder="Search projects, stories, or requirements..."
+              [disabled]="isSearching">
+            <div class="search-loading" *ngIf="isSearching">
+              <div class="micro-spinner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-body-premium">
+        <!-- Search Results -->
+        <div *ngIf="searchQuery && searchResults.length > 0" class="search-results-section">
+          <div class="results-header">
+            <h3>Search Results</h3>
+            <span class="results-count">{{ searchResults.length }} stories found for "{{ searchQuery }}"</span>
+          </div>
+          <div class="premium-grid">
+            <div class="story-card-premium" *ngFor="let story of searchResults">
+              <div class="story-card-header">
+                <h4>{{ story.user_story_title }}</h4>
+                <span class="story-date">{{ formatDate(story.user_story_created_at) }}</span>
+              </div>
+              <p class="story-preview">{{ story.user_story_content | slice:0:120 }}...</p>
+              <div class="story-actions">
+                <button class="action-btn testcases" (click)="viewUserStoryDetails(story.user_story_id, 'testcases')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 11H15M9 15H15M17 21L20 18V7C20 5.89543 19.1046 5 18 5H6C4.89543 5 4 5.89543 4 7V18L7 21H17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Test Cases
+                </button>
+                <button class="action-btn tasks" (click)="viewUserStoryDetails(story.user_story_id, 'tasks')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Tasks
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Search Results -->
+        <div *ngIf="searchQuery && searchResults.length === 0 && !isSearching" class="empty-state">
+          <div class="empty-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 21L15 15L21 21ZM17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>No Results Found</h3>
+          <p>No user stories match your search for "{{ searchQuery }}"</p>
+        </div>
+
+        <!-- History List -->
+        <div *ngIf="!searchQuery" class="history-section">
+          <div class="premium-grid" *ngIf="userStoryHistory.length > 0">
+            <div class="story-card-premium" *ngFor="let story of userStoryHistory">
+              <div class="story-card-header">
+                <h4>{{ story.user_story_title }}</h4>
+                <span class="story-date">{{ formatDate(story.user_story_created_at) }}</span>
+              </div>
+              <div class="story-metrics">
+                <div class="metric">
+                  <div class="metric-icon tasks">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="metric-content">
+                    <span class="metric-value">{{ story.task_count }}</span>
+                    <span class="metric-label">Tasks</span>
+                  </div>
+                </div>
+                <div class="metric">
+                  <div class="metric-icon tests">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 11H15M9 15H15M17 21L20 18V7C20 5.89543 19.1046 5 18 5H6C4.89543 5 4 5.89543 4 7V18L7 21H17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="metric-content">
+                    <span class="metric-value">{{ story.testcase_count }}</span>
+                    <span class="metric-label">Tests</span>
+                  </div>
+                </div>
+              </div>
+              <div class="story-actions">
+                <button class="action-btn testcases" (click)="viewUserStoryDetails(story.user_story_id, 'testcases')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 11H15M9 15H15M17 21L20 18V7C20 5.89543 19.1046 5 18 5H6C4.89543 5 4 5.89543 4 7V18L7 21H17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Test Cases
+                </button>
+                <button class="action-btn tasks" (click)="viewUserStoryDetails(story.user_story_id, 'tasks')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Tasks
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="userStoryHistory.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>No Stories Yet</h3>
+            <p>Create your first user story to see intelligent automation in action</p>
+            <button class="btn-primary-premium" (click)="showCreateView()">
+              <span class="btn-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 4V20M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </span>
+              Create First Story
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Details View -->
+  <div class="premium-content" *ngIf="currentView === 'details'">
+    <div class="details-navigation">
+      <button class="back-button" (click)="showHistoryView()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back to History
+      </button>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-container">
+        <div class="loading-spinner-large"></div>
+        <h3>Loading Analysis...</h3>
+        <p>Retrieving user story details and generated automation</p>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && selectedUserStory" class="details-layout">
+      <!-- User Story Details -->
+      <div class="premium-card story-details">
+        <div class="card-header-premium">
+          <div class="header-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="header-content-premium">
+            <h2>User Story Details</h2>
+            <p>Original requirements and specifications</p>
+          </div>
+        </div>
+        <div class="card-body-premium">
+          <h3 class="story-title">{{ selectedUserStory.user_story_title }}</h3>
+          <div class="story-content">{{ selectedUserStory.user_story_content }}</div>
+          <div class="story-metadata">
+            <div class="metadata-item">
+              <span class="metadata-label">Created:</span>
+              <span class="metadata-value">{{ formatDate(selectedUserStory.user_story_created_at) }}</span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Last Updated:</span>
+              <span class="metadata-value">{{ formatDate(selectedUserStory.user_story_updated_at) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- View Toggle -->
+      <div class="view-toggle-card">
+        <div class="toggle-buttons">
+          <button 
+            class="toggle-btn" 
+            [class.active]="selectedTab === 'testcases'"
+            (click)="selectedTab = 'testcases'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 11H15M9 15H15M17 21L20 18V7C20 5.89543 19.1046 5 18 5H6C4.89543 5 4 5.89543 4 7V18L7 21H17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Test Cases ({{ testCases.length }})
+          </button>
+          <button 
+            class="toggle-btn" 
+            [class.active]="selectedTab === 'tasks'"
+            (click)="selectedTab = 'tasks'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Development Tasks ({{ tasks.length }})
+          </button>
+        </div>
+      </div>
+
+      <!-- Test Cases Table View -->
+      <div class="premium-card" *ngIf="selectedTab === 'testcases'">
+        <div class="card-header-premium">
+          <div class="header-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 11H15M9 15H15M17 21L20 18V7C20 5.89543 19.1046 5 18 5H6C4.89543 5 4 5.89543 4 7V18L7 21H17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="header-content-premium">
+            <h2>Test Cases</h2>
+            <p>{{ testCases.length }} automated acceptance criteria generated</p>
+          </div>
+        </div>
+        <div class="card-body-premium">
+<div class="table-container" *ngIf="testCases.length > 0">
+  <table class="premium-table">
+    <thead>
+      <tr>
+        <th class="sortable-header" (click)="sortTable('index')">
+          #
+          <span class="sort-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                 [class.active]="sortColumn === 'index'" 
+                 [class.desc]="sortColumn === 'index' && sortDirection === 'desc'">
+              <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
+              <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
+            </svg>
+          </span>
+        </th>
+        <th class="sortable-header" (click)="sortTable('title')">
+          TEST CASE
+          <span class="sort-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                 [class.active]="sortColumn === 'title'" 
+                 [class.desc]="sortColumn === 'title' && sortDirection === 'desc'">
+              <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
+              <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
+            </svg>
+          </span>
+        </th>
+        <th class="sortable-header" (click)="sortTable('priority')">
+          PRIORITY
+          <span class="sort-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                 [class.active]="sortColumn === 'priority'" 
+                 [class.desc]="sortColumn === 'priority' && sortDirection === 'desc'">
+              <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
+              <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
+            </svg>
+          </span>
+        </th>
+        <th class="sortable-header" (click)="sortTable('type')">
+          TYPE
+          <span class="sort-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                 [class.active]="sortColumn === 'type'" 
+                 [class.desc]="sortColumn === 'type' && sortDirection === 'desc'">
+              <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
+              <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
+            </svg>
+          </span>
+        </th>
+        <th class="sortable-header" (click)="sortTable('status')">
+          STATUS
+          <span class="sort-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                 [class.active]="sortColumn === 'status'" 
+                 [class.desc]="sortColumn === 'status' && sortDirection === 'desc'">
+              <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
+              <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
+            </svg>
+          </span>
+        </th>
+        <th>ACTIONS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let testCase of sortedTestCases; let i = index">
+        <tr [class.expanded]="expandedTestCase === i">
+          <td class="test-number">{{ getOriginalIndex(testCase) + 1 }}</td>
+          <td class="test-title">
+            <div class="title-content">
+              <h4>{{ testCase.test_case_title }}</h4>
+              <p class="description">{{ testCase.test_case_description }}</p>
+            </div>
+          </td>
+          <td class="priority-cell">
+            <span class="badge priority" [ngClass]="getPriorityClass(testCase.priority.priority_code)">
+              {{ testCase.priority.priority_name }}
+            </span>
+          </td>
+          <td class="type-cell">
+            <span class="badge type">{{ testCase.test_type.ctgry_name }}</span>
+          </td>
+          <td class="status-cell">
+            <span class="badge status" [ngClass]="getStatusClass(testCase.status.status_code)">
+              {{ testCase.status.status_name }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button 
+              class="expand-btn" 
+              (click)="toggleTestCaseExpand(i)"
+              [title]="expandedTestCase === i ? 'Collapse details' : 'Expand details'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                   [style.transform]="expandedTestCase === i ? 'rotate(180deg)' : 'rotate(0deg)'">
+                <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="expandedTestCase === i" class="expanded-details">
+          <td colspan="6">
+            <div class="test-details-expanded">
+              <div class="details-grid-test">
+                <div class="test-steps-section">
+                  <h5>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 6H21M8 12H21M8 18H21M3 6H3.01M3 12H3.01M3 18H3.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Test Steps
+                  </h5>
+                  <ol class="steps-list">
+                    <li *ngFor="let step of testCase.test_case_steps">{{ step }}</li>
+                  </ol>
+                </div>
+                <div class="expected-result-section">
+                  <h5>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Expected Result
+                  </h5>
+                  <p>{{ testCase.test_case_expected_result }}</p>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+</div>
+          
+          <div *ngIf="testCases.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 11H15M9 15H15M17 21L20 18V7C20 5.89543 19.1046 5 18 5H6C4.89543 5 4 5.89543 4 7V18L7 21H17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h4>No Test Cases Generated</h4>
+            <p>No automated test cases available for this user story</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Development Tasks Professional View -->
+      <div class="premium-card" *ngIf="selectedTab === 'tasks'">
+        <div class="card-header-premium">
+          <div class="header-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="header-content-premium">
+            <h2>Development Tasks</h2>
+            <p>{{ tasks.length }} implementation tasks automatically generated</p>
+          </div>
+        </div>
+        <div class="card-body-premium">
+          <div class="tasks-professional-layout" *ngIf="tasks.length > 0">
+            <div class="task-card-professional" *ngFor="let task of tasks; let i = index">
+              <div class="task-header-professional">
+                <div class="task-number-professional">{{ i + 1 }}</div>
+                <div class="task-main-info">
+                  <h4 class="task-title-professional">{{ task.task_title }}</h4>
+                  <p class="task-description-professional">{{ task.task_description }}</p>
+                </div>
+                <div class="task-estimate-professional">
+                  <div class="estimate-value">{{ task.task_estimated_hours }}h</div>
+                  <div class="estimate-label">Estimated</div>
+                </div>
+              </div>
+              
+              <div class="task-badges-row">
+                <span class="badge priority" [ngClass]="getPriorityClass(task.priority.priority_code)">
+                  {{ task.priority.priority_name }}
+                </span>
+                <span class="badge status" [ngClass]="getStatusClass(task.status.status_code)">
+                  {{ task.status.status_name }}
+                </span>
+              </div>
+              
+              <div class="task-footer-professional">
+                <div class="assignee-section">
+                  <div class="assignee-info" *ngIf="task.assignee">
+                    <div class="assignee-avatar">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div class="assignee-details">
+                      <span class="assignee-name">{{ task.assignee.email }}</span>
+                      <span class="assignee-role">{{ task.assignee.role.role_name }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="assignee-info unassigned" *ngIf="!task.assignee">
+                    <div class="assignee-avatar unassigned">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 21V19C16 16.7909 14.2091 15 12 15C9.79086 15 8 16.7909 8 19V21M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="18" y1="8" x2="23" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="23" y1="8" x2="18" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div class="assignee-details">
+                      <span class="assignee-name">Unassigned</span>
+                      <span class="assignee-role">Available for assignment</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="labels-section" *ngIf="task.task_labels.length > 0">
+                  <div class="labels-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20.59 13.41L13.42 20.58C13.2343 20.766 13.0137 20.9135 12.7709 21.0141C12.5281 21.1148 12.2678 21.1666 12.005 21.1666C11.7422 21.1666 11.4819 21.1148 11.2391 21.0141C10.9963 20.9135 10.7757 20.766 10.59 20.58L2 12V2H12L20.59 10.59C20.9625 10.9647 21.1716 11.4716 21.1716 12C21.1716 12.5284 20.9625 13.0353 20.59 13.41V13.41Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="7" cy="7" r="1" fill="currentColor"/>
+                    </svg>
+                  </div>
+                  <div class="labels-list">
+                    <span class="label-tag" *ngFor="let label of task.task_labels">{{ label }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div *ngIf="tasks.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h4>No Tasks Generated</h4>
+            <p>No development tasks available for this user story</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
