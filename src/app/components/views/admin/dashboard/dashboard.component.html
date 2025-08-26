@@ -112,6 +112,7 @@
         </div>
         
         <!-- Header Actions -->
+<!-- Header Actions -->
         <div class="flex items-center space-x-4">
           <button 
             mat-icon-button 
@@ -126,6 +127,56 @@
             matTooltip="Settings">
             <mat-icon>settings</mat-icon>
           </button>
+
+          <!-- User Profile Dropdown -->
+          <div class="relative" [matMenuTriggerFor]="userMenu">
+            <button 
+              mat-button 
+              class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-lg px-3 py-2 transition-colors duration-200"
+              [matMenuTriggerFor]="userMenu"
+              matTooltip="User menu">
+              <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <mat-icon class="text-white text-sm">person</mat-icon>
+              </div>
+              <div class="hidden md:block text-left">
+                <div class="text-sm font-medium">{{ currentUser?.name || 'Developer' }}</div>
+                <div class="text-xs text-gray-500">{{ currentUser?.role || 'Admin User' }}</div>
+              </div>
+              <mat-icon class="text-gray-400">keyboard_arrow_down</mat-icon>
+            </button>
+          </div>
+
+          <!-- User Menu -->
+          <mat-menu #userMenu="matMenu" class="user-menu">
+            <div class="px-4 py-3 border-b border-gray-100">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <mat-icon class="text-white">person</mat-icon>
+                </div>
+                <div>
+                  <div class="font-medium text-gray-900">{{ currentUser?.name || 'Developer' }}</div>
+                  <div class="text-sm text-gray-500">{{ currentUser?.email || 'admin@gmail.com' }}</div>
+                </div>
+              </div>
+            </div>
+            
+            <button mat-menu-item (click)="openProfile()" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50">
+              <mat-icon class="text-gray-400">account_circle</mat-icon>
+              <span>Profile Settings</span>
+            </button>
+            
+            <button mat-menu-item (click)="openPreferences()" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50">
+              <mat-icon class="text-gray-400">tune</mat-icon>
+              <span>Preferences</span>
+            </button>
+            
+            <div class="border-t border-gray-100"></div>
+            
+            <button mat-menu-item (click)="logout()" class="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50">
+              <mat-icon class="text-red-500">logout</mat-icon>
+              <span>Sign Out</span>
+            </button>
+          </mat-menu>
         </div>
       </div>
     </header>
