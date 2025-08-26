@@ -1,0 +1,255 @@
+// Notion Integration Button Styles
+.notion-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  font-family: inherit;
+  text-decoration: none;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  // Size Variants
+  &.notion-btn-small {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    gap: 0.5rem;
+    
+    .notion-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+  
+  &.notion-btn-medium {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    gap: 0.5rem;
+    
+    .notion-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+  
+  &.notion-btn-large {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    gap: 0.75rem;
+    
+    .notion-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
+  // Style Variants
+  &.notion-btn-primary {
+    background: #000000;
+    color: white;
+    border: 1px solid #000000;
+    
+    &:hover:not(:disabled) {
+      background: #1a1a1a;
+      border-color: #1a1a1a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    &.authenticated {
+      background: #2d3748;
+      border-color: #2d3748;
+      
+      &:hover:not(:disabled) {
+        background: #1a202c;
+        border-color: #1a202c;
+      }
+    }
+  }
+  
+  &.notion-btn-secondary {
+    background: white;
+    color: #000000;
+    border: 1px solid #e2e8f0;
+    
+    &:hover:not(:disabled) {
+      background: #f8f9fa;
+      border-color: #000000;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    &.authenticated {
+      background: #f7fafc;
+      color: #2d3748;
+      border-color: #cbd5e0;
+      
+      &:hover:not(:disabled) {
+        background: #edf2f7;
+        border-color: #2d3748;
+      }
+      
+      .notion-status-indicator {
+        color: #38a169;
+      }
+    }
+  }
+  
+  &.notion-btn-ghost {
+    background: transparent;
+    color: #4a5568;
+    border: 1px solid transparent;
+    
+    &:hover:not(:disabled) {
+      background: #f7fafc;
+      color: #000000;
+      border-color: #e2e8f0;
+    }
+    
+    &.authenticated {
+      color: #2d3748;
+      
+      &:hover:not(:disabled) {
+        background: #edf2f7;
+        border-color: #cbd5e0;
+      }
+    }
+  }
+}
+
+// Button Content Layout
+.notion-btn-content {
+  display: flex;
+  align-items: center;
+  gap: inherit;
+  width: 100%;
+  justify-content: center;
+}
+
+// Notion Icon Styling
+.notion-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  svg {
+    transition: transform 0.2s ease;
+  }
+  
+  .notion-btn:hover:not(:disabled) & svg {
+    transform: scale(1.05);
+  }
+}
+
+// Button Text
+.notion-btn-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Status Indicator
+.notion-status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #38a169;
+  
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+// Loading States
+.notion-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  color: #718096;
+}
+
+.notion-creating-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Micro spinner for loading states
+.micro-spinner {
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-top: 1px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.notion-btn-secondary .micro-spinner,
+.notion-btn-ghost .micro-spinner {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-top: 1px solid currentColor;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Special states
+.notion-btn.not-authenticated {
+  .notion-icon svg path:first-child {
+    fill: #e2e8f0;
+  }
+  
+  &:hover:not(:disabled) .notion-icon svg path:first-child {
+    fill: #000000;
+  }
+}
+
+.notion-btn.authenticated {
+  .notion-icon svg path:first-child {
+    fill: #000000;
+  }
+}
+
+// Focus states for accessibility
+.notion-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .notion-btn-large {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    
+    .notion-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+  
+  .notion-btn-medium {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    
+    .notion-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}

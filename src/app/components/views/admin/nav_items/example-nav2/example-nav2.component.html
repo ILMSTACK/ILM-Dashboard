@@ -308,7 +308,7 @@
                 </button>
                 <button class="action-btn tasks" (click)="viewUserStoryDetails(story.user_story_id, 'tasks')">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12 C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                   Tasks
                 </button>
@@ -426,135 +426,148 @@
           </div>
         </div>
         <div class="card-body-premium">
-<div class="table-container" *ngIf="testCases.length > 0">
-  <table class="premium-table">
-    <thead>
-      <tr>
-        <th class="sortable-header" (click)="sortTable('index')">
-          #
-          <span class="sort-icon">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
-                 [class.active]="sortColumn === 'index'" 
-                 [class.desc]="sortColumn === 'index' && sortDirection === 'desc'">
-              <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
-              <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
-            </svg>
-          </span>
-        </th>
-        <th class="sortable-header" (click)="sortTable('title')">
-          TEST CASE
-          <span class="sort-icon">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                 [class.active]="sortColumn === 'title'" 
-                 [class.desc]="sortColumn === 'title' && sortDirection === 'desc'">
-              <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
-              <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
-            </svg>
-          </span>
-        </th>
-        <th class="sortable-header" (click)="sortTable('priority')">
-          PRIORITY
-          <span class="sort-icon">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                 [class.active]="sortColumn === 'priority'" 
-                 [class.desc]="sortColumn === 'priority' && sortDirection === 'desc'">
-              <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
-              <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
-            </svg>
-          </span>
-        </th>
-        <th class="sortable-header" (click)="sortTable('type')">
-          TYPE
-          <span class="sort-icon">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                 [class.active]="sortColumn === 'type'" 
-                 [class.desc]="sortColumn === 'type' && sortDirection === 'desc'">
-              <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
-              <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
-            </svg>
-          </span>
-        </th>
-        <th class="sortable-header" (click)="sortTable('status')">
-          STATUS
-          <span class="sort-icon">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                 [class.active]="sortColumn === 'status'" 
-                 [class.desc]="sortColumn === 'status' && sortDirection === 'desc'">
-              <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
-              <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
-            </svg>
-          </span>
-        </th>
-        <th>ACTIONS</th>
-      </tr>
-    </thead>
-    <tbody>
-      <ng-container *ngFor="let testCase of sortedTestCases; let i = index">
-        <tr [class.expanded]="expandedTestCase === i">
-          <td class="test-number">{{ getOriginalIndex(testCase) + 1 }}</td>
-          <td class="test-title">
-            <div class="title-content">
-              <h4>{{ testCase.test_case_title }}</h4>
-              <p class="description">{{ testCase.test_case_description }}</p>
-            </div>
-          </td>
-          <td class="priority-cell">
-            <span class="badge priority" [ngClass]="getPriorityClass(testCase.priority.priority_code)">
-              {{ testCase.priority.priority_name }}
-            </span>
-          </td>
-          <td class="type-cell">
-            <span class="badge type">{{ testCase.test_type.ctgry_name }}</span>
-          </td>
-          <td class="status-cell">
-            <span class="badge status" [ngClass]="getStatusClass(testCase.status.status_code)">
-              {{ testCase.status.status_name }}
-            </span>
-          </td>
-          <td class="actions-cell">
-            <button 
-              class="expand-btn" 
-              (click)="toggleTestCaseExpand(i)"
-              [title]="expandedTestCase === i ? 'Collapse details' : 'Expand details'">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
-                   [style.transform]="expandedTestCase === i ? 'rotate(180deg)' : 'rotate(0deg)'">
-                <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="expandedTestCase === i" class="expanded-details">
-          <td colspan="6">
-            <div class="test-details-expanded">
-              <div class="details-grid-test">
-                <div class="test-steps-section">
-                  <h5>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M8 6H21M8 12H21M8 18H21M3 6H3.01M3 12H3.01M3 18H3.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Test Steps
-                  </h5>
-                  <ol class="steps-list">
-                    <li *ngFor="let step of testCase.test_case_steps">{{ step }}</li>
-                  </ol>
-                </div>
-                <div class="expected-result-section">
-                  <h5>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Expected Result
-                  </h5>
-                  <p>{{ testCase.test_case_expected_result }}</p>
-                </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-      </ng-container>
-    </tbody>
-  </table>
-</div>
+          <div class="table-container" *ngIf="testCases.length > 0">
+            <table class="premium-table">
+              <thead>
+                <tr>
+                  <th class="sortable-header" (click)="sortTable('index')">
+                    #
+                    <span class="sort-icon">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                           [class.active]="sortColumn === 'index'" 
+                           [class.desc]="sortColumn === 'index' && sortDirection === 'desc'">
+                        <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
+                        <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                  </th>
+                  <th class="sortable-header" (click)="sortTable('title')">
+                    TEST CASE
+                    <span class="sort-icon">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                           [class.active]="sortColumn === 'title'" 
+                           [class.desc]="sortColumn === 'title' && sortDirection === 'desc'">
+                        <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
+                        <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                  </th>
+                  <th class="sortable-header" (click)="sortTable('priority')">
+                    PRIORITY
+                    <span class="sort-icon">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                           [class.active]="sortColumn === 'priority'" 
+                           [class.desc]="sortColumn === 'priority' && sortDirection === 'desc'">
+                        <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
+                        <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                  </th>
+                  <th class="sortable-header" (click)="sortTable('type')">
+                    TYPE
+                    <span class="sort-icon">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                           [class.active]="sortColumn === 'type'" 
+                           [class.desc]="sortColumn === 'type' && sortDirection === 'desc'">
+                        <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
+                        <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                  </th>
+                  <th class="sortable-header" (click)="sortTable('status')">
+                    STATUS
+                    <span class="sort-icon">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                           [class.active]="sortColumn === 'status'" 
+                           [class.desc]="sortColumn === 'status' && sortDirection === 'desc'">
+                        <path d="M12 3L8 7H16L12 3Z" fill="currentColor"/>
+                        <path d="M12 21L16 17H8L12 21Z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                  </th>
+                  <th>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let testCase of sortedTestCases; let i = index">
+                  <tr [class.expanded]="expandedTestCase === i">
+                    <td class="test-number">{{ getOriginalIndex(testCase) + 1 }}</td>
+                    <td class="test-title">
+                      <div class="title-content">
+                        <h4>{{ testCase.test_case_title }}</h4>
+                        <p class="description">{{ testCase.test_case_description }}</p>
+                      </div>
+                    </td>
+                    <td class="priority-cell">
+                      <span class="badge priority" [ngClass]="getPriorityClass(testCase.priority.priority_code)">
+                        {{ testCase.priority.priority_name }}
+                      </span>
+                    </td>
+                    <td class="type-cell">
+                      <span class="badge type">{{ testCase.test_type.ctgry_name }}</span>
+                    </td>
+                    <td class="status-cell">
+                      <span class="badge status" [ngClass]="getStatusClass(testCase.status.status_code)">
+                        {{ testCase.status.status_name }}
+                      </span>
+                    </td>
+                    <td class="actions-cell">
+                      <div class="actions-group">
+                        <!-- Existing Expand Button -->
+                        <button 
+                          class="expand-btn" 
+                          (click)="toggleTestCaseExpand(i)"
+                          [title]="expandedTestCase === i ? 'Collapse details' : 'Expand details'">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                               [style.transform]="expandedTestCase === i ? 'rotate(180deg)' : 'rotate(0deg)'">
+                            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </button>
+                        
+                        <!-- NEW: Notion Integration Button -->
+                        <app-notion-integration
+                          type="testcase"
+                          [data]="testCase"
+                          [userStoryId]="selectedUserStory?.user_story_id || 0"
+                          size="small"
+                          variant="ghost"
+                          [showText]="false">
+                        </app-notion-integration>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngIf="expandedTestCase === i" class="expanded-details">
+                    <td colspan="6">
+                      <div class="test-details-expanded">
+                        <div class="details-grid-test">
+                          <div class="test-steps-section">
+                            <h5>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 6H21M8 12H21M8 18H21M3 6H3.01M3 12H3.01M3 18H3.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                              Test Steps
+                            </h5>
+                            <ol class="steps-list">
+                              <li *ngFor="let step of testCase.test_case_steps">{{ step }}</li>
+                            </ol>
+                          </div>
+                          <div class="expected-result-section">
+                            <h5>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                              Expected Result
+                            </h5>
+                            <p>{{ testCase.test_case_expected_result }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
           
           <div *ngIf="testCases.length === 0" class="empty-state">
             <div class="empty-icon">
@@ -635,15 +648,29 @@
                   </div>
                 </div>
                 
-                <div class="labels-section" *ngIf="task.task_labels.length > 0">
-                  <div class="labels-header">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20.59 13.41L13.42 20.58C13.2343 20.766 13.0137 20.9135 12.7709 21.0141C12.5281 21.1148 12.2678 21.1666 12.005 21.1666C11.7422 21.1666 11.4819 21.1148 11.2391 21.0141C10.9963 20.9135 10.7757 20.766 10.59 20.58L2 12V2H12L20.59 10.59C20.9625 10.9647 21.1716 11.4716 21.1716 12C21.1716 12.5284 20.9625 13.0353 20.59 13.41V13.41Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <circle cx="7" cy="7" r="1" fill="currentColor"/>
-                    </svg>
+                <div class="task-actions-section">
+                  <div class="labels-section" *ngIf="task.task_labels.length > 0">
+                    <div class="labels-header">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20.59 13.41L13.42 20.58C13.2343 20.766 13.0137 20.9135 12.7709 21.0141C12.5281 21.1148 12.2678 21.1666 12.005 21.1666C11.7422 21.1666 11.4819 21.1148 11.2391 21.0141C10.9963 20.9135 10.7757 20.766 10.59 20.58L2 12V2H12L20.59 10.59C20.9625 10.9647 21.1716 11.4716 21.1716 12C21.1716 12.5284 20.9625 13.0353 20.59 13.41V13.41Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="7" cy="7" r="1" fill="currentColor"/>
+                      </svg>
+                    </div>
+                    <div class="labels-list">
+                      <span class="label-tag" *ngFor="let label of task.task_labels">{{ label }}</span>
+                    </div>
                   </div>
-                  <div class="labels-list">
-                    <span class="label-tag" *ngFor="let label of task.task_labels">{{ label }}</span>
+                  
+                  <!-- NEW: Notion Integration Button for Tasks -->
+                  <div class="notion-action">
+                    <app-notion-integration
+                      type="task"
+                      [data]="task"
+                      [userStoryId]="selectedUserStory?.user_story_id || 0"
+                      size="small"
+                      variant="secondary"
+                      [showText]="true">
+                    </app-notion-integration>
                   </div>
                 </div>
               </div>

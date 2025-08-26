@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BusinessAutomationService, UserStory, Task, TestCase, UserStoryHistory, CreateUserStoryRequest } from '../../../../../services/api/business-automation.service';
+import { NotionIntegrationComponent } from '../../../../shared/notion-integration/notion-integration.component';
 
 @Component({
   selector: 'app-example-nav2',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NotionIntegrationComponent],
   templateUrl: './example-nav2.component.html',
   styleUrl: './example-nav2.component.scss'
 })

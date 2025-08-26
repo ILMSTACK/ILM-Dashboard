@@ -124,4 +124,42 @@
       }
     }
   }
+  :host ::ng-deep .user-menu {
+  .mat-mdc-menu-panel {
+    min-width: 280px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+  }
+
+  .mat-mdc-menu-content {
+    padding: 0;
+  }
+
+  .mat-mdc-menu-item {
+    line-height: 1;
+    padding: 0;
+    min-height: auto;
+    
+    &:hover {
+      background-color: transparent;
+    }
+  }
+}
+
+// User profile button enhancements
+.user-profile-btn {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Logout button specific styles
+:host ::ng-deep .mat-mdc-menu-item .mat-icon {
+  margin-right: 0;
+}
 }
