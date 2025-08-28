@@ -42,7 +42,6 @@
               "src/styles.scss"
             ],
             "scripts": []
-            }
           },
           "configurations": {
             "production": {
