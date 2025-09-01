@@ -184,6 +184,53 @@ export class CsvService {
       headers: { 'accept': 'application/pdf' }
     });
   }
+  getDashboard(uploadId: number) {
+    // Get dashboard data for a specific upload
+    return this.http.get<{
+      ok: boolean;
+      csv_type: string;
+      format: string;
+      kpis: {
+        revenue: number;
+        units_sold: number;
+        orders: number;
+        aov: number;
+        unique_customers?: number;
+        new_customers?: number;
+        repeat_customers?: number;
+        cogs?: number;
+      };
+      sales_trend?: Array<{
+        date: string;
+        revenue: number;
+        units: number;
+      }>;
+      top_items?: Array<{
+        item_id: string;
+        revenue: number;
+        units: number;
+      }>;
+      top_customers?: Array<{
+        customer_id: string;
+        revenue: number;
+        orders: number;
+        customer_name: string;
+      }>;
+      customer_segments?: {
+        high_value: number;
+        loyal: number;
+        single_purchase: number;
+      };
+      inventory_levels?: Array<{
+        item_id: string;
+        on_hand: number;
+        wac: number;
+        value: number;
+      }>;
+    }>(`${this.base}/dashboard/${uploadId}`, {
+      headers: { 'accept': 'application/json' }
+    });
+  }
 
   // ------- Uploads -------
   upload(ctype: CsvType, file: File) {

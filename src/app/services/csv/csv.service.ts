@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { DashboardResponse } from '../insight/insight.service';
 
 @Injectable({ providedIn: 'root' })
 export class CsvService {
@@ -31,5 +32,14 @@ export class CsvService {
       headers: { 'accept': 'application/json' }
     });
   }
+
+  getDashboard(uploadId: number) {
+    // Get dashboard data for a specific upload
+    return this.http.get<DashboardResponse>(`${this.base}/dashboard/${uploadId}`, {
+      headers: { 'accept': 'application/json' }
+    });
+  }
+
+
 
 }

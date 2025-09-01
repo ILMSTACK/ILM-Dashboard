@@ -147,7 +147,8 @@
     <div *ngIf="!previousUploadsLoading() && previousUploads().length" class="p-6">
       <div class="space-y-3">
         <div *ngFor="let upload of previousUploads(); trackBy: trackByUploadId"
-          class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all">
+          class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+          (click)="onPreviousUploadClick(upload)">
 
           <div class="flex items-center">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3" [ngClass]="{
@@ -175,6 +176,7 @@
             }">
               {{ upload.status | titlecase }}
             </span>
+            <mat-icon class="text-gray-400 !text-sm">arrow_forward</mat-icon>
           </div>
         </div>
       </div>
