@@ -10,7 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
+
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -48,7 +48,7 @@ type UploadView = {
     CommonModule, FormsModule,
     MatIconModule, MatButtonModule, MatCardModule,
     MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule,
-    MatInputModule, MatProgressBarModule, MatTooltipModule, MatMenuModule],
+    MatInputModule, MatProgressBarModule, MatMenuModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -66,28 +66,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   insightText    = signal('');
 
 
-  // Existing Uploads
-  existingUploads = signal<Array<{
-    id: number;
-    csv_type: CsvType;
-    status: string;
-    row_count: number | null;
-    batch_id: string | null;
-    created_at: string;
-    validated_at: string | null;
-    original_filename: string;
-    format?: 'original' | 'enhanced';
-  }>>([]);
-  existingUploadsLoading = signal(false);
-  showExistingUploads = signal(true);
+
 
 
   // legacy hook (not used now but kept)
   private statusSub?: Subscription;
 
-  ngOnInit(): void {
-    this.loadExistingUploads();
-  }
+  ngOnInit(): void { /* no-op */ }
   ngOnDestroy(): void {
     if (this.statusSub) this.statusSub.unsubscribe();
     // cleanup charts
@@ -399,6 +384,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 tplLoading = signal(false);
 tplError   = signal('');
 
+// Business Report download state
+businessReportLoading = signal(false);
+
 // Download chosen template directly
 downloadTemplate(type: CsvType) {
   this.tplError.set('');
@@ -438,6 +426,44 @@ downloadTemplate(type: CsvType) {
 
 private safeDecode(s: string) {
   try { return decodeURIComponent(s); } catch { return s; }
+}
+
+// Download Business Report PDF
+downloadBusinessReport() {
+  this.businessReportLoading.set(true);
+
+  this.api.downloadBusinessReport().subscribe({
+    next: (res: any) => {
+      this.businessReportLoading.set(false);
+
+      // Handle the PDF blob response
+      let blob: Blob;
+      let filename = 'business-report.pdf';
+
+      if (res?.body && res?.headers) {
+        blob = res.body as Blob;
+        const cd = res.headers.get('content-disposition') || '';
+        const m = /filename\*=(?:UTF-8'')?([^;]+)|filename="?([^"]+)"?/i.exec(cd);
+        const raw = (m?.[1] || m?.[2] || filename).trim();
+        try { filename = decodeURIComponent(raw); } catch { filename = raw; }
+      } else {
+        blob = res.blob ?? res;
+        if (res.filename) filename = res.filename;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; 
+      a.download = filename; 
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    error: (e) => {
+      this.businessReportLoading.set(false);
+      console.error('Failed to download business report:', e);
+      // You could add error handling here, similar to template downloads
+    }
+  });
 }
 
 
@@ -732,106 +758,7 @@ private buildReportHtml(
 
 
 
-  // ======== Existing Uploads Management ========
-  loadExistingUploads() {
-    this.existingUploadsLoading.set(true);
-    this.api.getUploadIds().subscribe({
-      next: (uploads) => {
-        this.existingUploads.set(uploads);
-        this.existingUploadsLoading.set(false);
-      },
-      error: (e) => {
-        console.error('Failed to load existing uploads:', e);
-        this.existingUploadsLoading.set(false);
-      }
-    });
-  }
-
-  toggleExistingUploads() {
-    this.showExistingUploads.set(!this.showExistingUploads());
-  }
-
-  navigateToUploadDetail(uploadId: number) {
-    // For now, we'll scroll to show the detailed view in the same page
-    // Later this can be converted to proper routing
-    this.loadUploadDetail(uploadId);
-  }
-
-  private loadUploadDetail(uploadId: number) {
-    // Load dashboard data for this specific upload
-    this.api.dashboard(uploadId).subscribe({
-      next: (dashboard) => {
-        if (dashboard.ok) {
-          // Create a temporary upload view for this existing upload
-          const existingUpload = this.existingUploads().find(u => u.id === uploadId);
-          if (existingUpload) {
-            const key = this.genKey('existing');
-            const chartId = `chart-${key}`;
-            
-            const uploadView: UploadView = {
-              key,
-              fileName: existingUpload.original_filename,
-              type: existingUpload.csv_type,
-              progress: 100,
-              uploadId: existingUpload.id,
-              status: {
-                id: existingUpload.id,
-                csv_type: existingUpload.csv_type,
-                status: existingUpload.status as any,
-                row_count: existingUpload.row_count,
-                created_at: existingUpload.created_at,
-                validated_at: existingUpload.validated_at
-              },
-              dashboard,
-              chartId,
-              chart: null
-            };
-
-            // Add to uploads for display and render chart
-            this.uploads.update(current => {
-              // Remove any existing view for this upload
-              const filtered = current.filter(u => u.uploadId !== uploadId);
-              return [uploadView, ...filtered];
-            });
-
-            // Render chart after view updates
-            setTimeout(() => this.renderChartForUpload(key), 100);
-
-            // Scroll to the newly added upload card
-            setTimeout(() => {
-              const element = document.getElementById(chartId);
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-            }, 200);
-          }
-        }
-      },
-      error: (e) => {
-        console.error('Failed to load upload detail:', e);
-        alert('Failed to load upload details');
-      }
-    });
-  }
-
-
-
-
   // Formatting / trackBy
   formatMYR(value:number){ return new Intl.NumberFormat('ms-MY',{style:'currency',currency:'MYR'}).format(value); }
-  
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Asia/Kuala_Lumpur',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  }
-
   trackByKey(_i:number, u:UploadView){ return u.key; }
-  trackByUploadId(_i:number, u:any){ return u.id; }
 }

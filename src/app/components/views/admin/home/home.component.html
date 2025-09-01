@@ -4,7 +4,8 @@
   <!-- Dashboard Header with Controls -->
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-2">
     <div class="flex items-center">
-      <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+      <div
+        class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
         <mat-icon class="text-white text-xl">analytics</mat-icon>
       </div>
       <div>
@@ -13,46 +14,51 @@
       </div>
     </div>
 
-<div class="flex items-center gap-3">
-  <!-- Download CSV (menu) -->
-  <button mat-stroked-button [matMenuTriggerFor]="tplMenu" [disabled]="tplLoading()">
-    <mat-icon>download</mat-icon>
-    <span class="ml-2" *ngIf="!tplLoading()">Download CSV</span>
-    <span class="ml-2" *ngIf="tplLoading()">Downloading…</span>
-  </button>
-  <mat-menu #tplMenu="matMenu">
-    <button mat-menu-item (click)="downloadTemplate('sales')">
-      <mat-icon>receipt_long</mat-icon>
-      <span>Sales template</span>
-    </button>
-    <button mat-menu-item (click)="downloadTemplate('inventory')">
-      <mat-icon>inventory_2</mat-icon>
-      <span>Inventory template</span>
-    </button>
-  </mat-menu>
+    <div class="flex items-center gap-3">
+      <!-- Download CSV (menu) -->
+      <button mat-stroked-button [matMenuTriggerFor]="tplMenu" [disabled]="tplLoading()">
+        <mat-icon>download</mat-icon>
+        <span class="ml-2" *ngIf="!tplLoading()">Download CSV</span>
+        <span class="ml-2" *ngIf="tplLoading()">Downloading…</span>
+      </button>
+      <mat-menu #tplMenu="matMenu">
+        <button mat-menu-item (click)="downloadTemplate('sales')">
+          <mat-icon>receipt_long</mat-icon>
+          <span>Sales template</span>
+        </button>
+        <button mat-menu-item (click)="downloadTemplate('inventory')">
+          <mat-icon>inventory_2</mat-icon>
+          <span>Inventory template</span>
+        </button>
+      </mat-menu>
 
-  <!-- Generate Insight -->
-  <button mat-raised-button color="primary"
-          (click)="runBatchInsight()"
-          [disabled]="insightLoading() || uploads().length===0">
-    <mat-icon>lightbulb</mat-icon>
-    <span class="ml-2">Generate Insight</span>
-  </button>
+      <!-- Generate Insight -->
+      <button mat-raised-button color="primary" (click)="runBatchInsight()"
+        [disabled]="insightLoading() || uploads().length===0">
+        <mat-icon>lightbulb</mat-icon>
+        <span class="ml-2">Generate Insight</span>
+      </button>
 
-  <!-- Download Report -->
-  <button mat-stroked-button
-          (click)="downloadReport()"
-          [disabled]="insightLoading() || !insightText()"
-          class="!border-emerald-300 hover:!bg-emerald-50">
-    <mat-icon>picture_as_pdf</mat-icon>
-    <span class="ml-2">Download Report</span>
-  </button>
-</div>
+      <!-- Download Report -->
+      <button mat-stroked-button (click)="downloadReport()" [disabled]="insightLoading() || !insightText()"
+        class="!border-emerald-300 hover:!bg-emerald-50">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span class="ml-2">Download Report</span>
+      </button>
 
-<!-- Optional tiny error under header -->
-<div *ngIf="tplError()" class="text-red-700 bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-  {{ tplError() }}
-</div>
+      <!-- Download Business Report -->
+      <button mat-stroked-button (click)="downloadBusinessReport()" [disabled]="businessReportLoading()"
+        class="!border-orange-300 hover:!bg-orange-50">
+        <mat-icon>business</mat-icon>
+        <span class="ml-2" *ngIf="!businessReportLoading()">Business Report</span>
+        <span class="ml-2" *ngIf="businessReportLoading()">Downloading…</span>
+      </button>
+    </div>
+
+    <!-- Optional tiny error under header -->
+    <div *ngIf="tplError()" class="text-red-700 bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
+      {{ tplError() }}
+    </div>
 
 
   </div>
@@ -66,16 +72,13 @@
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-200">
       <h3 class="text-lg font-semibold text-gray-900">Upload Your Data</h3>
-      <p class="text-sm text-gray-600 mt-1">Drag & drop Sales or Inventory files. We’ll detect and validate them automatically.</p>
+      <p class="text-sm text-gray-600 mt-1">Drag & drop Sales or Inventory files. We’ll detect and validate them
+        automatically.</p>
     </div>
     <div class="p-6">
-      <div class="rounded-xl border-2 border-dashed"
-           [class.border-blue-300]="isDragging()"
-           [class.bg-blue-50]="isDragging()"
-           [class.border-gray-300]="!isDragging()"
-           (dragover)="onDragOver($event)"
-           (dragleave)="onDragLeave($event)"
-           (drop)="onDrop($event)">
+      <div class="rounded-xl border-2 border-dashed" [class.border-blue-300]="isDragging()"
+        [class.bg-blue-50]="isDragging()" [class.border-gray-300]="!isDragging()" (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
         <div class="flex flex-col items-center justify-center py-10 text-center">
           <mat-icon class="text-blue-500 text-4xl mb-2">cloud_upload</mat-icon>
           <p class="text-gray-700 font-medium">Drag & drop CSV/TSV files here</p>
@@ -85,7 +88,7 @@
             <span class="ml-2">Choose files</span>
           </button>
           <input #fileInput type="file" multiple accept=".csv,.tsv,text/csv,text/tab-separated-values"
-                 (change)="onPickFiles($event)" hidden>
+            (change)="onPickFiles($event)" hidden>
         </div>
       </div>
     </div>
@@ -93,7 +96,7 @@
 
   <!-- Insight Output -->
   <div *ngIf="insightLoading() || insightText() || insightError()"
-       class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-200">
       <div class="flex items-center justify-between">
         <div>
@@ -112,131 +115,23 @@
         {{ insightError() }}
       </div>
       <div *ngIf="!insightLoading() && insightText()"
-           class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 whitespace-pre-wrap">
+        class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 whitespace-pre-wrap">
         {{ insightText() }}
       </div>
     </div>
   </div>
 
-  <!-- Existing Uploads Section -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" 
-       *ngIf="existingUploads().length > 0 || existingUploadsLoading()">
-    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-      <div class="flex items-center">
-        <div class="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-700 rounded-lg flex items-center justify-center mr-3">
-          <mat-icon class="text-white">history</mat-icon>
-        </div>
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900">Previous Uploads</h3>
-          <p class="text-sm text-gray-600">View and analyze your uploaded CSV files</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-gray-500" *ngIf="!existingUploadsLoading()">
-          {{ existingUploads().length }} uploads
-        </span>
-        <button mat-stroked-button (click)="toggleExistingUploads()" 
-                class="!border-gray-300 hover:!bg-gray-50">
-          <mat-icon>{{ showExistingUploads() ? 'expand_less' : 'expand_more' }}</mat-icon>
-          <span class="ml-2">{{ showExistingUploads() ? 'Hide' : 'Show' }}</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Loading State -->
-    <div *ngIf="existingUploadsLoading()" class="px-6 py-8 text-center">
-      <mat-progress-spinner diameter="32" mode="indeterminate" class="mx-auto"></mat-progress-spinner>
-      <p class="text-gray-600 mt-3">Loading previous uploads...</p>
-    </div>
-
-    <!-- Uploads Grid -->
-    <div *ngIf="!existingUploadsLoading() && showExistingUploads() && existingUploads().length" 
-         class="p-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div *ngFor="let upload of existingUploads(); trackBy: trackByUploadId"
-             class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
-             (click)="navigateToUploadDetail(upload.id)">
-          
-          <!-- Upload Header -->
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex items-center min-w-0 flex-1">
-              <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3"
-                   [ngClass]="{
-                     'bg-blue-100 text-blue-600': upload.csv_type === 'sales',
-                     'bg-green-100 text-green-600': upload.csv_type === 'inventory'
-                   }">
-                <mat-icon class="!text-sm">
-                  {{ upload.csv_type === 'sales' ? 'receipt_long' : 'inventory_2' }}
-                </mat-icon>
-              </div>
-              <div class="min-w-0">
-                <div class="font-medium text-gray-900 truncate">{{ upload.original_filename }}</div>
-                <div class="text-xs text-gray-500">
-                  {{ upload.csv_type | titlecase }} • ID: {{ upload.id }}
-                </div>
-              </div>
-            </div>
-            
-            <!-- Enhanced Badge -->
-            <span *ngIf="upload.format === 'enhanced'" 
-                  class="inline-flex px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full border border-purple-200">
-              Enhanced
-            </span>
-          </div>
-
-          <!-- Upload Details -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-600">Status:</span>
-              <span class="inline-flex px-2 py-1 text-xs rounded-full"
-                    [ngClass]="{
-                      'bg-green-100 text-green-800': upload.status === 'processed' || upload.status === 'validated',
-                      'bg-red-100 text-red-800': upload.status === 'failed' || upload.status === 'invalid',
-                      'bg-yellow-100 text-yellow-800': upload.status === 'uploaded',
-                      'bg-gray-100 text-gray-800': !upload.status
-                    }">
-                {{ upload.status | titlecase }}
-              </span>
-            </div>
-            
-            <div class="flex items-center justify-between text-sm" *ngIf="upload.row_count">
-              <span class="text-gray-600">Rows:</span>
-              <span class="font-medium text-gray-900">{{ upload.row_count }}</span>
-            </div>
-            
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-600">Uploaded:</span>
-              <span class="text-gray-500">{{ formatDate(upload.created_at) }}</span>
-            </div>
-          </div>
-
-          <!-- Click Indicator -->
-          <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-            <span class="text-xs text-gray-500">Click to view details</span>
-            <mat-icon class="text-gray-400 !text-sm">arrow_forward</mat-icon>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Empty State -->
-    <div *ngIf="!existingUploadsLoading() && showExistingUploads() && existingUploads().length === 0"
-         class="px-6 py-8 text-center">
-      <mat-icon class="text-gray-300 !text-6xl mb-3">folder_open</mat-icon>
-      <p class="text-gray-500">No previous uploads found</p>
-      <p class="text-sm text-gray-400 mt-1">Upload your first CSV file to get started</p>
-    </div>
-  </div>
 
 
   <!-- Upload Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-         *ngFor="let u of uploads(); trackBy: trackByKey">
+      *ngFor="let u of uploads(); trackBy: trackByKey">
       <!-- Card Header -->
       <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <div class="flex items-center">
-          <div class="w-10 h-10 bg-gradient-to-br from-slate-500 to-slate-700 rounded-lg flex items-center justify-center mr-3">
+          <div
+            class="w-10 h-10 bg-gradient-to-br from-slate-500 to-slate-700 rounded-lg flex items-center justify-center mr-3">
             <mat-icon class="text-white">description</mat-icon>
           </div>
           <div class="min-w-0">
@@ -248,8 +143,7 @@
             </div>
           </div>
         </div>
-        <span class="text-xs px-3 py-1 rounded-full"
-              [ngClass]="{
+        <span class="text-xs px-3 py-1 rounded-full" [ngClass]="{
                 'bg-emerald-50 text-emerald-700 border border-emerald-200':
                   u.status?.status==='validated' || u.status?.status==='processed',
                 'bg-rose-50 text-rose-700 border border-rose-200':
@@ -263,8 +157,7 @@
       <!-- Progress -->
       <div *ngIf="!u.status" class="px-6 py-4">
         <div class="w-full bg-gray-200 rounded-full h-2">
-          <div class="h-2 rounded-full bg-blue-500 transition-all duration-500"
-               [style.width.%]="u.progress"></div>
+          <div class="h-2 rounded-full bg-blue-500 transition-all duration-500" [style.width.%]="u.progress"></div>
         </div>
         <div class="text-xs text-gray-500 mt-2">{{ u.progress }}%</div>
       </div>
@@ -278,28 +171,24 @@
 
       <!-- KPIs -->
       <div *ngIf="u.dashboard?.ok" class="px-6 pt-4 grid grid-cols-2 lg:grid-cols-3 gap-3">
-        <div *ngIf="u.dashboard?.kpis?.revenue !== undefined"
-             class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div *ngIf="u.dashboard?.kpis?.revenue !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div class="text-xs text-gray-500">Revenue</div>
           <div class="text-lg font-semibold text-gray-900">{{ formatMYR(u.dashboard?.kpis?.revenue || 0) }}</div>
         </div>
         <div *ngIf="u.dashboard?.kpis?.units_sold !== undefined"
-             class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          class="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div class="text-xs text-gray-500">Units Sold</div>
           <div class="text-lg font-semibold text-gray-900">{{ u.dashboard?.kpis?.units_sold || 0 }}</div>
         </div>
-        <div *ngIf="u.dashboard?.kpis?.orders !== undefined"
-             class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div *ngIf="u.dashboard?.kpis?.orders !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div class="text-xs text-gray-500">Orders</div>
           <div class="text-lg font-semibold text-gray-900">{{ u.dashboard?.kpis?.orders || 0 }}</div>
         </div>
-        <div *ngIf="u.dashboard?.kpis?.aov !== undefined"
-             class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div *ngIf="u.dashboard?.kpis?.aov !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div class="text-xs text-gray-500">AOV</div>
           <div class="text-lg font-semibold text-gray-900">{{ formatMYR(u.dashboard?.kpis?.aov || 0) }}</div>
         </div>
-        <div *ngIf="u.dashboard?.kpis?.cogs !== undefined"
-             class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div *ngIf="u.dashboard?.kpis?.cogs !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div class="text-xs text-gray-500">COGS</div>
           <div class="text-lg font-semibold text-gray-900">{{ formatMYR(u.dashboard?.kpis?.cogs || 0) }}</div>
         </div>
@@ -307,7 +196,8 @@
 
       <!-- Chart -->
       <div *ngIf="u.dashboard?.ok" class="px-6 pt-4">
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-dashed border-blue-200 flex items-center justify-center">
+        <div
+          class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-dashed border-blue-200 flex items-center justify-center">
           <canvas [id]="u.chartId" height="300" class="w-full"></canvas>
         </div>
       </div>
@@ -390,4 +280,3 @@
   </div>
 
 </div>
-

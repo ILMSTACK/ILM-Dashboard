@@ -176,6 +176,14 @@ export class CsvService {
       responseType: 'blob'
     });
   }
+  
+  downloadBusinessReport() {
+    // Download business report PDF from the specified endpoint
+    return this.http.get(`${this.base}/business-report/download`, { 
+      responseType: 'blob',
+      headers: { 'accept': 'application/pdf' }
+    });
+  }
 
   // ------- Uploads -------
   upload(ctype: CsvType, file: File) {
