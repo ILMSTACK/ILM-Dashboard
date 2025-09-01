@@ -72,7 +72,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   // legacy hook (not used now but kept)
   private statusSub?: Subscription;
 
-  ngOnInit(): void { /* no-op */ }
+  ngOnInit(): void {
+    this.loadPreviousUploads();
+  }
   ngOnDestroy(): void {
     if (this.statusSub) this.statusSub.unsubscribe();
     // cleanup charts
@@ -386,6 +388,15 @@ tplError   = signal('');
 
 // Business Report download state
 businessReportLoading = signal(false);
+
+// Previous uploads state
+previousUploads = signal<Array<{
+  id: number;
+  csv_type: string;
+  status: string;
+  original_filename: string;
+}>>([]);
+previousUploadsLoading = signal(false);
 
 // Download chosen template directly
 downloadTemplate(type: CsvType) {
@@ -758,7 +769,23 @@ private buildReportHtml(
 
 
 
+  // ======== Previous Uploads ========
+  loadPreviousUploads() {
+    this.previousUploadsLoading.set(true);
+    this.api.getUploadIds().subscribe({
+      next: (uploads) => {
+        this.previousUploads.set(uploads);
+        this.previousUploadsLoading.set(false);
+      },
+      error: (e) => {
+        console.error('Failed to load previous uploads:', e);
+        this.previousUploadsLoading.set(false);
+      }
+    });
+  }
+
   // Formatting / trackBy
   formatMYR(value:number){ return new Intl.NumberFormat('ms-MY',{style:'currency',currency:'MYR'}).format(value); }
   trackByKey(_i:number, u:UploadView){ return u.key; }
+  trackByUploadId(_i:number, u:any){ return u.id; }
 }
