@@ -118,6 +118,117 @@
     </div>
   </div>
 
+  <!-- Existing Uploads Section -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" 
+       *ngIf="existingUploads().length > 0 || existingUploadsLoading()">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+      <div class="flex items-center">
+        <div class="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-700 rounded-lg flex items-center justify-center mr-3">
+          <mat-icon class="text-white">history</mat-icon>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Previous Uploads</h3>
+          <p class="text-sm text-gray-600">View and analyze your uploaded CSV files</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-gray-500" *ngIf="!existingUploadsLoading()">
+          {{ existingUploads().length }} uploads
+        </span>
+        <button mat-stroked-button (click)="toggleExistingUploads()" 
+                class="!border-gray-300 hover:!bg-gray-50">
+          <mat-icon>{{ showExistingUploads() ? 'expand_less' : 'expand_more' }}</mat-icon>
+          <span class="ml-2">{{ showExistingUploads() ? 'Hide' : 'Show' }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="existingUploadsLoading()" class="px-6 py-8 text-center">
+      <mat-progress-spinner diameter="32" mode="indeterminate" class="mx-auto"></mat-progress-spinner>
+      <p class="text-gray-600 mt-3">Loading previous uploads...</p>
+    </div>
+
+    <!-- Uploads Grid -->
+    <div *ngIf="!existingUploadsLoading() && showExistingUploads() && existingUploads().length" 
+         class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div *ngFor="let upload of existingUploads(); trackBy: trackByUploadId"
+             class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+             (click)="navigateToUploadDetail(upload.id)">
+          
+          <!-- Upload Header -->
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center min-w-0 flex-1">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3"
+                   [ngClass]="{
+                     'bg-blue-100 text-blue-600': upload.csv_type === 'sales',
+                     'bg-green-100 text-green-600': upload.csv_type === 'inventory'
+                   }">
+                <mat-icon class="!text-sm">
+                  {{ upload.csv_type === 'sales' ? 'receipt_long' : 'inventory_2' }}
+                </mat-icon>
+              </div>
+              <div class="min-w-0">
+                <div class="font-medium text-gray-900 truncate">{{ upload.original_filename }}</div>
+                <div class="text-xs text-gray-500">
+                  {{ upload.csv_type | titlecase }} • ID: {{ upload.id }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Enhanced Badge -->
+            <span *ngIf="upload.format === 'enhanced'" 
+                  class="inline-flex px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full border border-purple-200">
+              Enhanced
+            </span>
+          </div>
+
+          <!-- Upload Details -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600">Status:</span>
+              <span class="inline-flex px-2 py-1 text-xs rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': upload.status === 'processed' || upload.status === 'validated',
+                      'bg-red-100 text-red-800': upload.status === 'failed' || upload.status === 'invalid',
+                      'bg-yellow-100 text-yellow-800': upload.status === 'uploaded',
+                      'bg-gray-100 text-gray-800': !upload.status
+                    }">
+                {{ upload.status | titlecase }}
+              </span>
+            </div>
+            
+            <div class="flex items-center justify-between text-sm" *ngIf="upload.row_count">
+              <span class="text-gray-600">Rows:</span>
+              <span class="font-medium text-gray-900">{{ upload.row_count }}</span>
+            </div>
+            
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600">Uploaded:</span>
+              <span class="text-gray-500">{{ formatDate(upload.created_at) }}</span>
+            </div>
+          </div>
+
+          <!-- Click Indicator -->
+          <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+            <span class="text-xs text-gray-500">Click to view details</span>
+            <mat-icon class="text-gray-400 !text-sm">arrow_forward</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!existingUploadsLoading() && showExistingUploads() && existingUploads().length === 0"
+         class="px-6 py-8 text-center">
+      <mat-icon class="text-gray-300 !text-6xl mb-3">folder_open</mat-icon>
+      <p class="text-gray-500">No previous uploads found</p>
+      <p class="text-sm text-gray-400 mt-1">Upload your first CSV file to get started</p>
+    </div>
+  </div>
+
+
   <!-- Upload Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
@@ -248,6 +359,7 @@
             </table>
           </div>
         </div>
+
       </div>
 
       <div *ngIf="u.dashboard?.csv_type === 'inventory'" class="p-6">
@@ -278,3 +390,4 @@
   </div>
 
 </div>
+

@@ -40,10 +40,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Navigation items
   navigationItems = [
     {
-      name: 'Home',
+      name: 'Analytics',
       route: 'home',
-      icon: 'home',
-      description: 'Dashboard home page'
+      icon: 'analytics',
+      description: 'Data insights & reports'
+    },
+    {
+      name: 'Customers',
+      route: 'customers',
+      icon: 'people',
+      description: 'Manage customer relationships'
+    },
+    {
+      name: 'Email Campaigns',
+      route: 'campaigns',
+      icon: 'email',
+      description: 'Marketing & communication'
     },
     {
       name: 'Example 1',

@@ -1,0 +1,278 @@
+<!-- Email Campaign Management Dashboard -->
+<div class="p-6 space-y-6">
+
+  <!-- Page Header -->
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div class="flex items-center">
+      <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl flex items-center justify-center mr-4">
+        <mat-icon class="text-white text-xl">email</mat-icon>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Email Campaigns</h1>
+        <p class="text-gray-600 mt-1">Create and manage your marketing campaigns</p>
+      </div>
+    </div>
+
+    <!-- Quick Action Button -->
+    <button mat-raised-button color="primary" (click)="openCustomEmailBuilder()">
+      <mat-icon class="mr-2">add</mat-icon>
+      Create Campaign
+    </button>
+  </div>
+
+  <!-- Campaign Templates -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Campaign Templates</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      
+      <!-- Loyalty Campaign -->
+      <div class="border border-blue-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+           (click)="openCampaignBuilder('loyalty')">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+            <mat-icon class="text-blue-600">card_giftcard</mat-icon>
+          </div>
+          <div>
+            <h4 class="font-semibold text-gray-900">Reward VIPs</h4>
+            <p class="text-sm text-gray-500">Loyalty Campaign</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-600 mb-4">Thank loyal customers with exclusive offers and discounts.</p>
+        <div class="flex items-center text-sm text-blue-600">
+          <mat-icon class="!text-sm mr-1">arrow_forward</mat-icon>
+          Create Campaign
+        </div>
+      </div>
+
+      <!-- Product Promotion -->
+      <div class="border border-purple-200 rounded-xl p-6 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
+           (click)="openCampaignBuilder('promotion')">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+            <mat-icon class="text-purple-600">local_offer</mat-icon>
+          </div>
+          <div>
+            <h4 class="font-semibold text-gray-900">Promote Products</h4>
+            <p class="text-sm text-gray-500">Product Campaign</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-600 mb-4">Highlight specific items or announce new arrivals with special pricing.</p>
+        <div class="flex items-center text-sm text-purple-600">
+          <mat-icon class="!text-sm mr-1">arrow_forward</mat-icon>
+          Create Campaign
+        </div>
+      </div>
+
+      <!-- Win-Back Campaign -->
+      <div class="border border-orange-200 rounded-xl p-6 hover:border-orange-300 hover:shadow-md transition-all cursor-pointer"
+           (click)="openCampaignBuilder('winback')">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+            <mat-icon class="text-orange-600">refresh</mat-icon>
+          </div>
+          <div>
+            <h4 class="font-semibold text-gray-900">Win Back</h4>
+            <p class="text-sm text-gray-500">Re-engagement Campaign</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-600 mb-4">Re-engage customers who haven't purchased recently with special offers.</p>
+        <div class="flex items-center text-sm text-orange-600">
+          <mat-icon class="!text-sm mr-1">arrow_forward</mat-icon>
+          Create Campaign
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Email Option -->
+    <div class="mt-6 pt-6 border-t border-gray-200">
+      <button mat-stroked-button class="w-full !border-gray-300 hover:!bg-gray-50" 
+              (click)="openCustomEmailBuilder()">
+        <mat-icon class="mr-2">edit</mat-icon>
+        Send Custom Message to All Customers
+      </button>
+    </div>
+  </div>
+
+  <!-- Campaigns List -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900">Your Campaigns</h3>
+      <mat-icon class="text-gray-400">campaign</mat-icon>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="campaignsLoading()" class="px-6 py-12 text-center">
+      <mat-progress-spinner diameter="40" mode="indeterminate" class="mx-auto"></mat-progress-spinner>
+      <p class="text-gray-600 mt-4">Loading campaigns...</p>
+    </div>
+
+    <!-- Campaign Cards -->
+    <div *ngIf="!campaignsLoading() && emailCampaigns().length" class="p-6">
+      <div class="space-y-4">
+        <div *ngFor="let campaign of emailCampaigns(); trackBy: trackByCampaignId" 
+             class="border border-gray-200 rounded-lg p-6 hover:border-purple-300 hover:shadow-sm transition-all">
+          
+          <div class="flex items-start justify-between">
+            <div class="flex items-start min-w-0 flex-1">
+              <div class="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center mr-4">
+                <mat-icon class="text-purple-600 !text-sm">{{ getCampaignTypeIcon(campaign.campaign_type) }}</mat-icon>
+              </div>
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <h4 class="font-semibold text-gray-900">{{ campaign.name }}</h4>
+                  <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                        [ngClass]="getCampaignTypeColor(campaign.campaign_type)">
+                    {{ campaign.campaign_type | titlecase }}
+                  </span>
+                </div>
+                
+                <p class="text-sm text-gray-600 mb-3">{{ campaign.subject }}</p>
+                
+                <div class="flex items-center gap-6 text-sm text-gray-500">
+                  <div class="flex items-center">
+                    <mat-icon class="!text-sm mr-1">people</mat-icon>
+                    {{ campaign.total_recipients || 0 }} recipients
+                  </div>
+                  <div class="flex items-center">
+                    <mat-icon class="!text-sm mr-1">schedule</mat-icon>
+                    {{ formatDate(campaign.created_at) }}
+                  </div>
+                  <div *ngIf="campaign.sent_at" class="flex items-center">
+                    <mat-icon class="!text-sm mr-1">send</mat-icon>
+                    Sent {{ formatDate(campaign.sent_at) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Campaign Status & Actions -->
+            <div class="flex items-center gap-3 ml-4">
+              <span class="inline-flex px-3 py-1 text-sm font-medium rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': campaign.status === 'sent',
+                      'bg-yellow-100 text-yellow-800': campaign.status === 'draft',
+                      'bg-blue-100 text-blue-800': campaign.status === 'scheduled'
+                    }">
+                {{ campaign.status | titlecase }}
+              </span>
+              
+              <div class="flex gap-1">
+                <button mat-icon-button (click)="viewCampaignStats(campaign.id)" 
+                        matTooltip="View Statistics" class="!text-purple-600">
+                  <mat-icon class="!text-sm">analytics</mat-icon>
+                </button>
+                
+                <button *ngIf="campaign.status === 'draft'" 
+                        mat-icon-button (click)="sendCampaign(campaign.id)"
+                        matTooltip="Send Campaign" class="!text-green-600">
+                  <mat-icon class="!text-sm">send</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!campaignsLoading() && emailCampaigns().length === 0" class="px-6 py-12 text-center">
+      <mat-icon class="text-gray-300 !text-6xl mb-4">campaign</mat-icon>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No campaigns yet</h3>
+      <p class="text-gray-500 mb-4">Create your first email campaign to start engaging with customers.</p>
+      <button mat-raised-button color="primary" (click)="openCustomEmailBuilder()">
+        <mat-icon class="mr-2">add</mat-icon>
+        Create Your First Campaign
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Campaign Builder Modal -->
+<div *ngIf="showCampaignBuilder()" 
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-auto">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+      <h2 class="text-xl font-bold text-gray-900">{{ getCampaignBuilderTitle() }}</h2>
+      <button mat-icon-button (click)="closeCampaignBuilder()" class="!text-gray-500">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Campaign Form -->
+    <div class="p-6">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Campaign Name</label>
+          <input type="text" 
+                 [value]="campaignForm()?.name || ''"
+                 (input)="updateCampaignForm('name', $event)"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                 placeholder="Enter campaign name">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Email Subject</label>
+          <input type="text" 
+                 [value]="campaignForm()?.subject || ''"
+                 (input)="updateCampaignForm('subject', $event)"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                 placeholder="Enter email subject">
+        </div>
+
+        <div *ngIf="selectedCampaignType() !== 'custom'">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Discount Percentage</label>
+          <input type="number" 
+                 [value]="campaignForm()?.discount_percent || ''"
+                 (input)="updateCampaignForm('discount_percent', $event)"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                 placeholder="e.g., 20" min="1" max="50">
+        </div>
+
+        <div *ngIf="selectedCampaignType() === 'custom'">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+          <textarea rows="6" 
+                    [value]="campaignForm()?.body || ''"
+                    (input)="updateCampaignForm('body', $event)"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Write your message..."></textarea>
+        </div>
+
+        <div *ngIf="selectedCampaignType() === 'custom' && !preSelectedCustomer()">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Send To</label>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-select [value]="campaignForm()?.segment || 'all'" 
+                       (selectionChange)="updateCampaignFormSelect('segment', $event.value)">
+              <mat-option value="all">All Customers</mat-option>
+              <mat-option value="loyal">Loyal Customers Only</mat-option>
+              <mat-option value="high_value">VIP Customers Only</mat-option>
+              <mat-option value="frequent">Active Buyers Only</mat-option>
+              <mat-option value="at_risk">Inactive Customers Only</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div class="text-sm text-purple-800">
+            <mat-icon class="inline mr-1 !text-sm">info</mat-icon>
+            {{ getCampaignDescription() }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-6 flex gap-3">
+        <button mat-raised-button color="primary" 
+                (click)="createCampaignFromBuilder()" 
+                [disabled]="!isValidCampaignForm()">
+          <mat-icon class="mr-2">{{ selectedCampaignType() === 'custom' ? 'send' : 'add' }}</mat-icon>
+          {{ selectedCampaignType() === 'custom' ? 'Send Email' : 'Create Campaign' }}
+        </button>
+        <button mat-stroked-button (click)="closeCampaignBuilder()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
