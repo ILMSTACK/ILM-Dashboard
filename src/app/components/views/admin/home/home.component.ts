@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,13 +11,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+
+import { CustomerInsightModalComponent } from './customer-insight-modal.component';
+
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 import {
-  CsvService, CsvType, CsvUploadOk, CsvStatus,
+  CsvService as InsightCsvService, CsvType, CsvUploadOk, CsvStatus,
   DashboardResponse, InsightResponse
 } from '../../../../services/insight/insight.service';
+import { CsvService } from '../../../../services/csv/csv.service';
 
 import { HttpEventType } from '@angular/common/http';
 import { Subscription } from 'rxjs';
@@ -40,6 +47,32 @@ type UploadView = {
   chart?: Chart | null;
 };
 
+interface CustomerInsightData {
+  ok: boolean;
+  customer: {
+    customer_id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    first_purchase_date: string;
+    last_purchase_date: string;
+    total_orders: number;
+    total_spent: number;
+    average_order_value: number;
+    days_since_last_purchase: number;
+    created_at: string;
+    recent_purchases: Array<{
+      invoice_id: string;
+      invoice_date: string;
+      item_name: string;
+      qty: number;
+      revenue: number;
+    }>;
+  };
+  insight: string;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -47,13 +80,14 @@ type UploadView = {
     CommonModule, FormsModule,
     MatIconModule, MatButtonModule, MatCardModule,
     MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule,
-    MatInputModule, MatProgressBarModule
-,MatMenuModule  ],
+    MatInputModule, MatProgressBarModule, MatTooltipModule, MatMenuModule, MatDialogModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  private api = inject(CsvService);
+  private api = inject(InsightCsvService);
+  private csvApi = inject(CsvService);
+  private dialog = inject(MatDialog);
 
   // ======== Batch & DnD state ========
   uploads = signal<UploadView[]>([]);
@@ -62,17 +96,23 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Insight (batch)
   insightLoading = signal(false);
-  insightError   = signal('');
-  insightText    = signal('');
+  insightError = signal('');
+  insightText = signal('');
+
+
+
+
 
   // legacy hook (not used now but kept)
   private statusSub?: Subscription;
 
-  ngOnInit(): void { /* no-op */ }
+  ngOnInit(): void {
+    this.loadPreviousUploads();
+  }
   ngOnDestroy(): void {
     if (this.statusSub) this.statusSub.unsubscribe();
     // cleanup charts
-    this.uploads().forEach(u => { try { u.chart?.destroy(); } catch {} });
+    this.uploads().forEach(u => { try { u.chart?.destroy(); } catch { } });
   }
 
   // ======== DnD handlers ========
@@ -194,7 +234,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.api.pollStatus(uploadId).subscribe({
       next: (s) => {
         this.updateUpload(key, { status: s });
-        if (['validated','processed'].includes(s.status)) {
+        if (['validated', 'processed'].includes(s.status)) {
           // fetch dashboard & render chart/table
           this.api.dashboard(s.id).subscribe({
             next: d => {
@@ -220,7 +260,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!u || !u.dashboard || !u.chartId) return;
 
     // destroy previous chart if any
-    try { u.chart?.destroy(); } catch {}
+    try { u.chart?.destroy(); } catch { }
 
     const canvas = document.getElementById(u.chartId) as HTMLCanvasElement | null;
     if (!canvas) return;
@@ -281,7 +321,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.insightError.set('');
     this.insightText.set('');
     this.insightLoading.set(true);
-    this.api.insightBatch(this.batchId()).subscribe({
+    this.api.insightBatch().subscribe({
       next: (res) => {
         this.insightLoading.set(false);
         if (!res.ok) { this.insightError.set(res.error || 'Batch insight error'); return; }
@@ -292,8 +332,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // ======== Helpers ========
-  private genKey(prefix='row'){ return (crypto as any)?.randomUUID?.() ?? `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`; }
-  private errMsg = (e:any, fb='Error') => e?.error?.error || e?.message || fb;
+  private genKey(prefix = 'row') { return (crypto as any)?.randomUUID?.() ?? `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
+  private errMsg = (e: any, fb = 'Error') => e?.error?.error || e?.message || fb;
 
   private updateUpload(key: string, patch: Partial<UploadView>) {
     this.uploads.update(arr => arr.map(r => r.key === key ? ({ ...r, ...patch }) : r));
@@ -318,16 +358,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     const cols = new Set(parts);
 
     // Required sets (as provided)
-    const SALES_REQ = ['invoice_id','invoice_date','customer_id','item_id','qty','unit_price'];
+    const SALES_REQ = ['invoice_id', 'invoice_date', 'customer_id', 'item_id', 'qty', 'unit_price'];
     const SALES_OPT = ['tax_rate'];
 
-    const INV_REQ   = ['move_id','move_date','item_id','type','qty','unit_cost'];
+    const INV_REQ = ['move_id', 'move_date', 'item_id', 'type', 'qty', 'unit_cost'];
 
     const missSales = this.missingColumns(cols, SALES_REQ);
-    const missInv   = this.missingColumns(cols, INV_REQ);
+    const missInv = this.missingColumns(cols, INV_REQ);
 
     const salesOK = missSales.length === 0;
-    const invOK   = missInv.length === 0;
+    const invOK = missInv.length === 0;
 
     let type: CsvType | 'unknown' = 'unknown';
     if (invOK && !salesOK) type = 'inventory';
@@ -337,9 +377,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     // try to infer delimiter for future parsing if needed
     const delimiter = (headerLine.includes('\t') ? '\t'
-                     : headerLine.includes(',') ? ','
-                     : headerLine.includes(';') ? ';'
-                     : headerLine.includes('|') ? '|' : ',');
+      : headerLine.includes(',') ? ','
+        : headerLine.includes(';') ? ';'
+          : headerLine.includes('|') ? '|' : ',');
 
     const missing = type === 'unknown'
       ? (missInv.length <= missSales.length ? missInv.map(c => `inventory:${c}`) : missSales.map(c => `sales:${c}`))
@@ -376,212 +416,263 @@ export class HomeComponent implements OnInit, OnDestroy {
     } catch { return fb; }
   }
 
-// ---- CSV Template download state (keep if you already have it)
-tplLoading = signal(false);
-tplError   = signal('');
+  // ---- CSV Template download state (keep if you already have it)
+  tplLoading = signal(false);
+  tplError = signal('');
 
-// Download chosen template directly
-downloadTemplate(type: CsvType) {
-  this.tplError.set('');
-  this.tplLoading.set(true);
+  // Business Report download state
+  businessReportLoading = signal(false);
 
-  this.api.downloadTemplate(type).subscribe({
-    next: (res: any) => {
-      this.tplLoading.set(false);
+  // Previous uploads state
+  previousUploads = signal<Array<{
+    id: number;
+    csv_type: string;
+    status: string;
+    filename: string;
+  }>>([]);
+  previousUploadsLoading = signal(false);
+  loadingUploadId = signal<number | null>(null);
 
-      // Support HttpResponse<Blob> shape
-      let blob: Blob;
-      let filename = `${type}_template.csv`;
+  // Download chosen template directly
+  downloadTemplate(type: CsvType) {
+    this.tplError.set('');
+    this.tplLoading.set(true);
 
-      if (res?.body && res?.headers) {
-        blob = res.body as Blob;
-        const cd = res.headers.get('content-disposition') || '';
-        const m = /filename\*=(?:UTF-8'')?([^;]+)|filename="?([^"]+)"?/i.exec(cd);
-        const raw = (m?.[1] || m?.[2] || filename).trim();
-        try { filename = decodeURIComponent(raw); } catch { filename = raw; }
-      } else {
-        // or mapped { blob, filename }
-        blob = res.blob ?? res;
-        if (res.filename) filename = res.filename;
-      }
+    this.csvApi.downloadTemplate(type).subscribe({
+      next: (res: any) => {
+        this.tplLoading.set(false);
 
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
-    },
-    error: (e) => {
-      this.tplLoading.set(false);
-      this.tplError.set(e?.error?.error || e?.message || 'Failed to download template');
-    }
-  });
-}
+        // Support HttpResponse<Blob> shape
+        let blob: Blob;
+        let filename = `${type}_template.csv`;
 
-private safeDecode(s: string) {
-  try { return decodeURIComponent(s); } catch { return s; }
-}
-
-
-// ===== Report download (client-side HTML report) =====
-// ===== Report download (client-side HTML report with CHART IMAGES) =====
-async downloadReport() {
-  const hasInsight = !!this.insightText();
-  const dashboards = this.uploads().filter(u => u.dashboard?.ok);
-  if (!hasInsight && dashboards.length === 0) return;
-
-  // capture chart images for each upload (existing canvas or offscreen render)
-  const charts = new Map<string, string>(); // key: uploadId or key
-  for (const u of dashboards) {
-    const src = await this.getChartDataUrlForUpload(u);
-    if (src) charts.set(String(u.uploadId ?? u.key), src);
-  }
-
-  const html = this.buildReportHtml(hasInsight, dashboards, charts);
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-
-  const stamp = this.filenameStamp();
-  const filename = `ILM_Report_${stamp}.html`;
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
-// Try to use the on-screen chart; fallback to an offscreen render.
-private async getChartDataUrlForUpload(u: any): Promise<string | null> {
-  const id = u.chartId as string | undefined;
-  if (id) {
-    const canvas = document.getElementById(id) as HTMLCanvasElement | null;
-    if (canvas) {
-      try { return canvas.toDataURL('image/png'); } catch {}
-    }
-  }
-  // Fallback: render offscreen from dashboard data
-  if (u.dashboard) {
-    try { return await this.renderOffscreenChartAndGetDataUrl(u.dashboard); }
-    catch { /* ignore */ }
-  }
-  return null;
-}
-
-private buildChartConfigForDashboard(d: DashboardResponse): any /* ChartConfiguration */ {
-  if (d.csv_type === 'sales') {
-    const labels = (d.sales_trend ?? []).map(x => x.date);
-    const data = (d.sales_trend ?? []).map(x => x.revenue);
-    return {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Revenue',
-          data,
-          tension: 0.35,
-          fill: false
-        }]
-      },
-      options: {
-        responsive: false, // important for offscreen/export
-        animation: false,
-        plugins: { legend: { display: true } },
-        scales: {
-          x: { title: { display: true, text: 'Date' } },
-          y: { title: { display: true, text: 'Revenue' }, beginAtZero: true }
+        if (res?.body && res?.headers) {
+          blob = res.body as Blob;
+          const cd = res.headers.get('content-disposition') || '';
+          const m = /filename\*=(?:UTF-8'')?([^;]+)|filename="?([^"]+)"?/i.exec(cd);
+          const raw = (m?.[1] || m?.[2] || filename).trim();
+          try { filename = decodeURIComponent(raw); } catch { filename = raw; }
+        } else {
+          // or mapped { blob, filename }
+          blob = res.blob ?? res;
+          if (res.filename) filename = res.filename;
         }
-      }
-    };
-  } else {
-    const inv = (d.inventory_levels ?? []);
-    return {
-      type: 'bar',
-      data: {
-        labels: inv.map(i => i.item_id),
-        datasets: [{ label: 'On Hand', data: inv.map(i => i.on_hand) }]
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
       },
-      options: {
-        responsive: false,
-        animation: false,
-        plugins: { legend: { display: true } },
-        scales: {
-          x: { title: { display: true, text: 'Item' } },
-          y: { title: { display: true, text: 'Quantity' }, beginAtZero: true }
-        }
+      error: (e) => {
+        this.tplLoading.set(false);
+        this.tplError.set(e?.error?.error || e?.message || 'Failed to download template');
       }
-    };
+    });
   }
-}
 
-private async renderOffscreenChartAndGetDataUrl(d: DashboardResponse): Promise<string> {
-  // higher resolution for print
-  const width = 1000, height = 420;
-  const canvas = document.createElement('canvas');
-  canvas.width = width; canvas.height = height;
+  private safeDecode(s: string) {
+    try { return decodeURIComponent(s); } catch { return s; }
+  }
 
-  const cfg = this.buildChartConfigForDashboard(d);
-  // ensure we don't mutate the live canvas
-  const ctx = canvas.getContext('2d')!;
-  // @ts-ignore - Chart type union is fine at runtime
-  const chart = new Chart(ctx, cfg);
-  // draw immediately (no animation)
-  const dataUrl = canvas.toDataURL('image/png');
-  chart.destroy();
-  return dataUrl;
-}
+  // Download Business Report PDF
+  downloadBusinessReport() {
+    this.businessReportLoading.set(true);
+
+    this.csvApi.downloadBusinessReport().subscribe({
+      next: (res: any) => {
+        this.businessReportLoading.set(false);
+
+        // Handle the PDF blob response
+        let blob: Blob;
+        let filename = 'business-report.pdf';
+
+        if (res?.body && res?.headers) {
+          blob = res.body as Blob;
+          const cd = res.headers.get('content-disposition') || '';
+          const m = /filename\*=(?:UTF-8'')?([^;]+)|filename="?([^"]+)"?/i.exec(cd);
+          const raw = (m?.[1] || m?.[2] || filename).trim();
+          try { filename = decodeURIComponent(raw); } catch { filename = raw; }
+        } else {
+          blob = res.blob ?? res;
+          if (res.filename) filename = res.filename;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: (e) => {
+        this.businessReportLoading.set(false);
+        console.error('Failed to download business report:', e);
+        // You could add error handling here, similar to template downloads
+      }
+    });
+  }
 
 
-private filenameStamp() {
-  // Asia/Kuala_Lumpur friendly stamp
-  const now = new Date();
-  const toParts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Kuala_Lumpur',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', hour12: false
-  }).formatToParts(now);
-  const get = (t: string) => toParts.find(p => p.type === t)?.value || '00';
-  return `${get('year')}-${get('month')}-${get('day')}_${get('hour')}-${get('minute')}`;
-}
+  // ===== Report download (client-side HTML report) =====
+  // ===== Report download (client-side HTML report with CHART IMAGES) =====
+  async downloadReport() {
+    const hasInsight = !!this.insightText();
+    const dashboards = this.uploads().filter(u => u.dashboard?.ok);
+    if (!hasInsight && dashboards.length === 0) return;
 
-private esc(s: any) {
-  return String(s ?? '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+    // capture chart images for each upload (existing canvas or offscreen render)
+    const charts = new Map<string, string>(); // key: uploadId or key
+    for (const u of dashboards) {
+      const src = await this.getChartDataUrlForUpload(u);
+      if (src) charts.set(String(u.uploadId ?? u.key), src);
+    }
 
-private buildReportHtml(
-  hasInsight: boolean,
-  dashboards: Array<any>,
-  charts: Map<string, string>
-) {
-  const title = 'ILM Analytics Report';
-  const subtitle = 'Business Intelligence & Data Insights';
-  const generatedAt = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Kuala_Lumpur',
-    dateStyle: 'full', timeStyle: 'short'
-  }).format(new Date());
-  const batch = this.batchId();
+    const html = this.buildReportHtml(hasInsight, dashboards, charts);
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
 
-  const uploadSections = dashboards.map(u => {
-    const d = u.dashboard!;
-    const key = String(u.uploadId ?? u.key);
-    const chartImg = charts.get(key) || '';
+    const stamp = this.filenameStamp();
+    const filename = `ILM_Report_${stamp}.html`;
 
-    const k = d.kpis || {};
-    const kpiCells = [
-      k.revenue !== undefined ? `<div class="kpi kpi-indigo"><div>Revenue</div><b>${this.formatMYR(k.revenue)}</b></div>` : '',
-      k.units_sold !== undefined ? `<div class="kpi kpi-sky"><div>Units Sold</div><b>${this.esc(k.units_sold)}</b></div>` : '',
-      k.orders !== undefined ? `<div class="kpi kpi-violet"><div>Orders</div><b>${this.esc(k.orders)}</b></div>` : '',
-      k.aov !== undefined ? `<div class="kpi kpi-fuchsia"><div>AOV</div><b>${this.formatMYR(k.aov)}</b></div>` : '',
-      k.cogs !== undefined ? `<div class="kpi kpi-rose"><div>COGS</div><b>${this.formatMYR(k.cogs)}</b></div>` : '',
-    ].join('');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
 
-    let tables = '';
+  // Try to use the on-screen chart; fallback to an offscreen render.
+  private async getChartDataUrlForUpload(u: any): Promise<string | null> {
+    const id = u.chartId as string | undefined;
+    if (id) {
+      const canvas = document.getElementById(id) as HTMLCanvasElement | null;
+      if (canvas) {
+        try { return canvas.toDataURL('image/png'); } catch { }
+      }
+    }
+    // Fallback: render offscreen from dashboard data
+    if (u.dashboard) {
+      try { return await this.renderOffscreenChartAndGetDataUrl(u.dashboard); }
+      catch { /* ignore */ }
+    }
+    return null;
+  }
+
+  private buildChartConfigForDashboard(d: DashboardResponse): any /* ChartConfiguration */ {
     if (d.csv_type === 'sales') {
-      const trendRows = (d.sales_trend ?? [])
-        .map(r => `<tr><td>${this.esc(r.date)}</td><td>${this.formatMYR(r.revenue)}</td><td>${this.esc(r.units)}</td></tr>`)
-        .join('');
-      const topRows = (d.top_items ?? [])
-        .map(t => `<tr><td>${this.esc(t.item_id)}</td><td>${this.formatMYR(t.revenue)}</td><td>${this.esc(t.units)}</td></tr>`)
-        .join('');
-      tables = `
+      const labels = (d.sales_trend ?? []).map(x => x.date);
+      const data = (d.sales_trend ?? []).map(x => x.revenue);
+      return {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Revenue',
+            data,
+            tension: 0.35,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: false, // important for offscreen/export
+          animation: false,
+          plugins: { legend: { display: true } },
+          scales: {
+            x: { title: { display: true, text: 'Date' } },
+            y: { title: { display: true, text: 'Revenue' }, beginAtZero: true }
+          }
+        }
+      };
+    } else {
+      const inv = (d.inventory_levels ?? []);
+      return {
+        type: 'bar',
+        data: {
+          labels: inv.map(i => i.item_id),
+          datasets: [{ label: 'On Hand', data: inv.map(i => i.on_hand) }]
+        },
+        options: {
+          responsive: false,
+          animation: false,
+          plugins: { legend: { display: true } },
+          scales: {
+            x: { title: { display: true, text: 'Item' } },
+            y: { title: { display: true, text: 'Quantity' }, beginAtZero: true }
+          }
+        }
+      };
+    }
+  }
+
+  private async renderOffscreenChartAndGetDataUrl(d: DashboardResponse): Promise<string> {
+    // higher resolution for print
+    const width = 1000, height = 420;
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+
+    const cfg = this.buildChartConfigForDashboard(d);
+    // ensure we don't mutate the live canvas
+    const ctx = canvas.getContext('2d')!;
+    // @ts-ignore - Chart type union is fine at runtime
+    const chart = new Chart(ctx, cfg);
+    // draw immediately (no animation)
+    const dataUrl = canvas.toDataURL('image/png');
+    chart.destroy();
+    return dataUrl;
+  }
+
+
+  private filenameStamp() {
+    // Asia/Kuala_Lumpur friendly stamp
+    const now = new Date();
+    const toParts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Kuala_Lumpur',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    }).formatToParts(now);
+    const get = (t: string) => toParts.find(p => p.type === t)?.value || '00';
+    return `${get('year')}-${get('month')}-${get('day')}_${get('hour')}-${get('minute')}`;
+  }
+
+  private esc(s: any) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  private buildReportHtml(
+    hasInsight: boolean,
+    dashboards: Array<any>,
+    charts: Map<string, string>
+  ) {
+    const title = 'ILM Analytics Report';
+    const subtitle = 'Business Intelligence & Data Insights';
+    const generatedAt = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Kuala_Lumpur',
+      dateStyle: 'full', timeStyle: 'short'
+    }).format(new Date());
+    const batch = this.batchId();
+
+    const uploadSections = dashboards.map(u => {
+      const d = u.dashboard!;
+      const key = String(u.uploadId ?? u.key);
+      const chartImg = charts.get(key) || '';
+
+      const k = d.kpis || {};
+      const kpiCells = [
+        k.revenue !== undefined ? `<div class="kpi kpi-indigo"><div>Revenue</div><b>${this.formatMYR(k.revenue)}</b></div>` : '',
+        k.units_sold !== undefined ? `<div class="kpi kpi-sky"><div>Units Sold</div><b>${this.esc(k.units_sold)}</b></div>` : '',
+        k.orders !== undefined ? `<div class="kpi kpi-violet"><div>Orders</div><b>${this.esc(k.orders)}</b></div>` : '',
+        k.aov !== undefined ? `<div class="kpi kpi-fuchsia"><div>AOV</div><b>${this.formatMYR(k.aov)}</b></div>` : '',
+        k.cogs !== undefined ? `<div class="kpi kpi-rose"><div>COGS</div><b>${this.formatMYR(k.cogs)}</b></div>` : '',
+      ].join('');
+
+      let tables = '';
+      if (d.csv_type === 'sales') {
+        const trendRows = (d.sales_trend ?? [])
+          .map(r => `<tr><td>${this.esc(r.date)}</td><td>${this.formatMYR(r.revenue)}</td><td>${this.esc(r.units)}</td></tr>`)
+          .join('');
+        const topRows = (d.top_items ?? [])
+          .map(t => `<tr><td>${this.esc(t.item_id)}</td><td>${this.formatMYR(t.revenue)}</td><td>${this.esc(t.units)}</td></tr>`)
+          .join('');
+        tables = `
         <h4>Sales Trend</h4>
         <div class="table-wrap">
           <table><thead><tr><th>Date</th><th>Revenue</th><th>Units</th></tr></thead>
@@ -592,28 +683,28 @@ private buildReportHtml(
           <table><thead><tr><th>Item</th><th>Revenue</th><th>Units</th></tr></thead>
           <tbody>${topRows || '<tr><td colspan="3">No data</td></tr>'}</tbody></table>
         </div>`;
-    } else {
-      const invRows = (d.inventory_levels ?? [])
-        .map(i => `<tr><td>${this.esc(i.item_id)}</td><td>${this.esc(i.on_hand)}</td><td>${this.formatMYR(i.wac)}</td><td>${this.formatMYR(i.value)}</td></tr>`)
-        .join('');
-      tables = `
+      } else {
+        const invRows = (d.inventory_levels ?? [])
+          .map(i => `<tr><td>${this.esc(i.item_id)}</td><td>${this.esc(i.on_hand)}</td><td>${this.formatMYR(i.wac)}</td><td>${this.formatMYR(i.value)}</td></tr>`)
+          .join('');
+        tables = `
         <h4>Inventory Levels</h4>
         <div class="table-wrap">
           <table><thead><tr><th>Item</th><th>On Hand</th><th>WAC</th><th>Value</th></tr></thead>
           <tbody>${invRows || '<tr><td colspan="4">No data</td></tr>'}</tbody></table>
         </div>`;
-    }
+      }
 
-    const chartBlock = chartImg
-      ? `<div class="chart-box"><img alt="Chart" src="${chartImg}"></div>`
-      : '';
+      const chartBlock = chartImg
+        ? `<div class="chart-box"><img alt="Chart" src="${chartImg}"></div>`
+        : '';
 
-    return `
+      return `
       <section class="card">
-        <div class="card-head ${d.csv_type==='sales' ? 'head-indigo' : 'head-emerald'}">
+        <div class="card-head ${d.csv_type === 'sales' ? 'head-indigo' : 'head-emerald'}">
           <div class="title">
-            <span class="pill ${d.csv_type==='sales' ? 'pill-indigo' : 'pill-emerald'}">${this.esc(d.csv_type)}</span>
-            <strong>${this.esc(u.fileName || `Upload ${u.uploadId||''}`)}</strong>
+            <span class="pill ${d.csv_type === 'sales' ? 'pill-indigo' : 'pill-emerald'}">${this.esc(d.csv_type)}</span>
+            <strong>${this.esc(u.fileName || `Upload ${u.uploadId || ''}`)}</strong>
           </div>
           <div class="meta">Upload ID: ${this.esc(u.uploadId)} • Rows: ${this.esc(u.status?.row_count ?? '—')}</div>
         </div>
@@ -623,9 +714,9 @@ private buildReportHtml(
           ${tables}
         </div>
       </section>`;
-  }).join('\n');
+    }).join('\n');
 
-  const insightBlock = hasInsight ? `
+    const insightBlock = hasInsight ? `
     <section class="card">
       <div class="card-head head-amber">
         <div class="title"><span class="pill pill-amber">Insight</span><strong>AI-generated Insight</strong></div>
@@ -636,7 +727,7 @@ private buildReportHtml(
       </div>
     </section>` : '';
 
-  return `<!doctype html>
+    return `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -708,12 +799,163 @@ private buildReportHtml(
 
 </body>
 </html>`;
-}
+  }
 
 
 
 
-  // Formatting / trackBy
-  formatMYR(value:number){ return new Intl.NumberFormat('ms-MY',{style:'currency',currency:'MYR'}).format(value); }
-  trackByKey(_i:number, u:UploadView){ return u.key; }
+  // ======== Previous Uploads ========
+  loadPreviousUploads() {
+    this.previousUploadsLoading.set(true);
+    this.csvApi.getUploadIds().subscribe({
+      next: (uploads) => {
+        this.previousUploads.set(uploads);
+        this.previousUploadsLoading.set(false);
+      },
+      error: (e) => {
+        console.error('Failed to load previous uploads:', e);
+        this.previousUploadsLoading.set(false);
+      }
+    });
+  }
+
+  onPreviousUploadClick(upload: any) {
+    // Set loading state
+    this.loadingUploadId.set(upload.id);
+
+    // Create a new upload view for the clicked previous upload
+    const key = this.genKey('previous');
+    const chartId = `chart-${key}`;
+
+    // Add to current uploads display
+    const uploadView: UploadView = {
+      key,
+      fileName: upload.filename,
+      type: upload.csv_type as CsvType,
+      progress: 100,
+      uploadId: upload.id,
+      status: {
+        id: upload.id,
+        csv_type: upload.csv_type,
+        status: upload.status,
+        row_count: null,
+        created_at: new Date().toISOString(),
+        validated_at: null
+      },
+      chartId,
+      chart: null
+    };
+
+    // Load dashboard data
+    this.csvApi.getDashboard(upload.id).subscribe({
+      next: (dashboard) => {
+        if (dashboard.ok) {
+          uploadView.dashboard = dashboard;
+
+          // Add to uploads array (remove any existing view for this upload first)
+          this.uploads.update(current => {
+            const filtered = current.filter(u => u.uploadId !== upload.id);
+            return [uploadView, ...filtered];
+          });
+
+          // Render chart after view updates
+          setTimeout(() => this.renderChartForUpload(key), 100);
+
+          // Scroll to the newly added upload card
+          setTimeout(() => {
+            const element = document.getElementById(chartId);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 200);
+        }
+      },
+      error: (e) => {
+        console.error('Failed to load dashboard for upload:', upload.id, e);
+        uploadView.error = 'Failed to load dashboard data';
+        this.uploads.update(current => [uploadView, ...current]);
+      }
+    });
+  }
+
+  closeUpload(key: string) {
+    // Find and destroy chart before removing
+    const upload = this.uploads().find(u => u.key === key);
+    if (upload?.chart) {
+      try {
+        upload.chart.destroy();
+      } catch (e) {
+        console.warn('Error destroying chart:', e);
+      }
+    }
+
+    // Remove upload from the list
+    this.uploads.update(current => current.filter(u => u.key !== key));
+  }
+
+  // Formatting / trackBy / Sorting
+  formatMYR(value: number) { return new Intl.NumberFormat('ms-MY', { style: 'currency', currency: 'MYR' }).format(value); }
+  trackByKey(_i: number, u: UploadView) { return u.key; }
+  trackByUploadId(_i: number, u: any) { return u.id; }
+
+  sortByUnitsDesc(items: any[]) {
+    return [...items].sort((a, b) => b.units - a.units);
+  }
+
+  sortByRevenueDesc(items: any[]) {
+    return [...items].sort((a, b) => b.revenue - a.revenue);
+  }
+
+  // Customer insight modal functionality
+  openCustomerInsight(customerId: string): void {
+    // Open modal immediately with loading state
+    const dialogRef = this.dialog.open(CustomerInsightModalComponent, {
+      width: '800px',
+      maxWidth: '95vw',
+      data: null, // Start with null to show loading
+      disableClose: false
+    });
+
+    // Fetch both customer details and insight
+    Promise.all([
+      firstValueFrom(this.api.getCustomer(customerId)).catch(() => null),
+      firstValueFrom(this.api.getCustomerInsight(customerId))
+    ]).then(([customerDetails, insightResponse]) => {
+      if (insightResponse?.ok) {
+        // Merge the data (customerDetails might be null if API call failed)
+        const mergedData = {
+          ok: true,
+          customer: {
+            ...insightResponse.customer,
+            ...(customerDetails ? {
+              email: customerDetails.email,
+              phone: customerDetails.phone,
+              address: customerDetails.address,
+              first_purchase_date: customerDetails.first_purchase_date,
+              last_purchase_date: customerDetails.last_purchase_date,
+              average_order_value: customerDetails.average_order_value,
+              days_since_last_purchase: customerDetails.days_since_last_purchase,
+              created_at: customerDetails.created_at,
+              recent_purchases: customerDetails.recent_purchases
+            } : {})
+          },
+          insight: insightResponse.insight
+        };
+        dialogRef.componentInstance.data = mergedData;
+      } else {
+        dialogRef.componentInstance.data = {
+          ok: false,
+          customer: {} as any,
+          insight: ''
+        };
+      }
+    }).catch((error) => {
+      console.error('Failed to load customer data:', error);
+      dialogRef.componentInstance.data = {
+        ok: false,
+        customer: {} as any,
+        insight: ''
+      };
+    });
+  }
 }

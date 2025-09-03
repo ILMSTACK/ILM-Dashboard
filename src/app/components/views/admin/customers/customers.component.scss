@@ -1,0 +1,60 @@
+// Customer Management Component Styles
+
+.customer-card {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.customer-avatar {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.metric-card {
+  &:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s ease-in-out;
+  }
+}
+
+.segment-button {
+  transition: all 0.2s ease-in-out;
+  
+  &.active {
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+  }
+}
+
+// Modal overlay
+.modal-overlay {
+  backdrop-filter: blur(4px);
+}
+
+// Customer value badges
+.badge-vip {
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  color: white;
+}
+
+.badge-high-value {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.badge-loyal {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.badge-new {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+// Stats cards
+.stat-card {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border: 1px solid #e2e8f0;
+}

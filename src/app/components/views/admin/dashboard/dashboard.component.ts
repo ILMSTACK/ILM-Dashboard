@@ -40,23 +40,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Navigation items
   navigationItems = [
     {
-      name: 'Home',
+      name: 'Analytics',
       route: 'home',
-      icon: 'home',
-      description: 'Dashboard home page'
+      icon: 'analytics',
+      description: 'Data insights & reports'
     },
     {
-      name: 'Example 1',
-      route: 'example1',
-      icon: 'explore',
-      description: 'API Testing features'
+      name: 'Customers',
+      route: 'customers',
+      icon: 'people',
+      description: 'Manage customer relationships'
     },
     {
-      name: 'Example 2',
+      name: 'Email Campaigns',
+      route: 'campaigns',
+      icon: 'email',
+      description: 'Marketing & communication'
+    },
+    {
+      name: 'User Story',
       route: 'example2',
       icon: 'science',
-      description: 'Second example component'
-    }
+      description: 'Test case & Task'
+    },
+    {
+      name: 'KPI',
+      route: 'example2',
+      icon: 'science',
+      description: ''
+    },
+
   ];
 
   private destroy$ = new Subject<void>();

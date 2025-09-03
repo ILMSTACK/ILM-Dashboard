@@ -4,7 +4,8 @@
   <!-- Dashboard Header with Controls -->
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-2">
     <div class="flex items-center">
-      <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+      <div
+        class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
         <mat-icon class="text-white text-xl">analytics</mat-icon>
       </div>
       <div>
@@ -13,46 +14,50 @@
       </div>
     </div>
 
-<div class="flex items-center gap-3">
-  <!-- Download CSV (menu) -->
-  <button mat-stroked-button [matMenuTriggerFor]="tplMenu" [disabled]="tplLoading()">
-    <mat-icon>download</mat-icon>
-    <span class="ml-2" *ngIf="!tplLoading()">Download CSV</span>
-    <span class="ml-2" *ngIf="tplLoading()">Downloading…</span>
-  </button>
-  <mat-menu #tplMenu="matMenu">
-    <button mat-menu-item (click)="downloadTemplate('sales')">
-      <mat-icon>receipt_long</mat-icon>
-      <span>Sales template</span>
-    </button>
-    <button mat-menu-item (click)="downloadTemplate('inventory')">
-      <mat-icon>inventory_2</mat-icon>
-      <span>Inventory template</span>
-    </button>
-  </mat-menu>
+    <div class="flex items-center gap-3">
+      <!-- Download CSV (menu) -->
+      <button mat-stroked-button [matMenuTriggerFor]="tplMenu" [disabled]="tplLoading()">
+        <mat-icon>download</mat-icon>
+        <span class="ml-2" *ngIf="!tplLoading()">Download CSV</span>
+        <span class="ml-2" *ngIf="tplLoading()">Downloading…</span>
+      </button>
+      <mat-menu #tplMenu="matMenu">
+        <button mat-menu-item (click)="downloadTemplate('sales')">
+          <mat-icon>receipt_long</mat-icon>
+          <span>Sales template</span>
+        </button>
+        <button mat-menu-item (click)="downloadTemplate('inventory')">
+          <mat-icon>inventory_2</mat-icon>
+          <span>Inventory template</span>
+        </button>
+      </mat-menu>
 
-  <!-- Generate Insight -->
-  <button mat-raised-button color="primary"
-          (click)="runBatchInsight()"
-          [disabled]="insightLoading() || uploads().length===0">
-    <mat-icon>lightbulb</mat-icon>
-    <span class="ml-2">Generate Insight</span>
-  </button>
+      <!-- Generate Insight -->
+      <button mat-raised-button color="primary" (click)="runBatchInsight()">
+        <mat-icon>lightbulb</mat-icon>
+        <span class="ml-2">Generate Insight</span>
+      </button>
 
-  <!-- Download Report -->
-  <button mat-stroked-button
-          (click)="downloadReport()"
-          [disabled]="insightLoading() || !insightText()"
-          class="!border-emerald-300 hover:!bg-emerald-50">
-    <mat-icon>picture_as_pdf</mat-icon>
-    <span class="ml-2">Download Report</span>
-  </button>
-</div>
+      <!-- Download Report -->
+      <!-- <button mat-stroked-button (click)="downloadReport()" [disabled]="insightLoading() || !insightText()"
+        class="!border-emerald-300 hover:!bg-emerald-50">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span class="ml-2">Download Report</span>
+      </button>  -->
 
-<!-- Optional tiny error under header -->
-<div *ngIf="tplError()" class="text-red-700 bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-  {{ tplError() }}
-</div>
+      <!-- Download Business Report -->
+      <button mat-stroked-button (click)="downloadBusinessReport()" [disabled]="businessReportLoading()"
+        class="!border-orange-300 hover:!bg-orange-50">
+        <mat-icon>business</mat-icon>
+        <span class="ml-2" *ngIf="!businessReportLoading()">Business Report</span>
+        <span class="ml-2" *ngIf="businessReportLoading()">Downloading…</span>
+      </button>
+    </div>
+
+    <!-- Optional tiny error under header -->
+    <div *ngIf="tplError()" class="text-red-700 bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
+      {{ tplError() }}
+    </div>
 
 
   </div>
@@ -63,19 +68,16 @@
   </div>
 
   <!-- Dropzone -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden max-h-76">
     <div class="px-6 py-4 border-b border-gray-200">
       <h3 class="text-lg font-semibold text-gray-900">Upload Your Data</h3>
-      <p class="text-sm text-gray-600 mt-1">Drag & drop Sales or Inventory files. We’ll detect and validate them automatically.</p>
+      <p class="text-sm text-gray-600 mt-1">Drag & drop Sales or Inventory files. We’ll detect and validate them
+        automatically.</p>
     </div>
     <div class="p-6">
-      <div class="rounded-xl border-2 border-dashed"
-           [class.border-blue-300]="isDragging()"
-           [class.bg-blue-50]="isDragging()"
-           [class.border-gray-300]="!isDragging()"
-           (dragover)="onDragOver($event)"
-           (dragleave)="onDragLeave($event)"
-           (drop)="onDrop($event)">
+      <div class="rounded-xl border-2 border-dashed" [class.border-blue-300]="isDragging()"
+        [class.bg-blue-50]="isDragging()" [class.border-gray-300]="!isDragging()" (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
         <div class="flex flex-col items-center justify-center py-10 text-center">
           <mat-icon class="text-blue-500 text-4xl mb-2">cloud_upload</mat-icon>
           <p class="text-gray-700 font-medium">Drag & drop CSV/TSV files here</p>
@@ -85,7 +87,7 @@
             <span class="ml-2">Choose files</span>
           </button>
           <input #fileInput type="file" multiple accept=".csv,.tsv,text/csv,text/tab-separated-values"
-                 (change)="onPickFiles($event)" hidden>
+            (change)="onPickFiles($event)" hidden>
         </div>
       </div>
     </div>
@@ -93,7 +95,7 @@
 
   <!-- Insight Output -->
   <div *ngIf="insightLoading() || insightText() || insightError()"
-       class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-200">
       <div class="flex items-center justify-between">
         <div>
@@ -112,20 +114,92 @@
         {{ insightError() }}
       </div>
       <div *ngIf="!insightLoading() && insightText()"
-           class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 whitespace-pre-wrap">
+        class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 whitespace-pre-wrap">
         {{ insightText() }}
       </div>
     </div>
   </div>
 
+  <!-- Previous Uploads -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+    *ngIf="previousUploads().length > 0 || previousUploadsLoading()">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center">
+        <div
+          class="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-700 rounded-lg flex items-center justify-center mr-3">
+          <mat-icon class="text-white">history</mat-icon>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Monthly Report</h3>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="previousUploadsLoading()" class="px-6 py-8 text-center">
+      <mat-progress-spinner diameter="32" mode="indeterminate" class="mx-auto"></mat-progress-spinner>
+      <p class="text-gray-600 mt-3">Loading previous uploads...</p>
+    </div>
+
+    <!-- Uploads List -->
+    <div *ngIf="!previousUploadsLoading() && previousUploads().length" class="p-6">
+      <div class="space-y-3">
+        <div *ngFor="let upload of previousUploads(); trackBy: trackByUploadId"
+          class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md hover:bg-blue-50/30 transition-all duration-200 cursor-pointer transform hover:scale-[1.02]"
+          (click)="onPreviousUploadClick(upload)">
+
+          <div class="flex items-center">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3" [ngClass]="{
+              'bg-blue-100 text-blue-600': upload.csv_type === 'sales',
+              'bg-green-100 text-green-600': upload.csv_type === 'inventory'
+            }">
+              <mat-icon class="!text-sm">
+                {{ upload.csv_type === 'sales' ? 'receipt_long' : 'inventory_2' }}
+              </mat-icon>
+            </div>
+            <div>
+              <div class="font-medium text-gray-900">{{ upload.filename }}</div>
+              <div class="text-sm text-gray-500">
+               {{ upload.filename }} • ID: {{ upload.id }}
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span class="inline-flex px-2 py-1 text-xs rounded-full" [ngClass]="{
+              'bg-green-100 text-green-800': upload.status === 'validated' || upload.status === 'processed',
+              'bg-red-100 text-red-800': upload.status === 'failed' || upload.status === 'invalid',
+              'bg-yellow-100 text-yellow-800': upload.status === 'uploaded',
+              'bg-gray-100 text-gray-800': !upload.status
+            }">
+              {{ upload.status | titlecase }}
+            </span>
+            <mat-progress-spinner *ngIf="loadingUploadId() === upload.id" diameter="16" mode="indeterminate">
+            </mat-progress-spinner>
+            <mat-icon *ngIf="loadingUploadId() !== upload.id" class="text-gray-400 !text-sm">arrow_forward</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!previousUploadsLoading() && previousUploads().length === 0" class="px-6 py-8 text-center">
+      <mat-icon class="text-gray-300 !text-6xl mb-3">folder_open</mat-icon>
+      <p class="text-gray-500">No previous uploads found</p>
+      <p class="text-sm text-gray-400 mt-1">Upload your first CSV file to get started</p>
+    </div>
+  </div>
+
   <!-- Upload Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div>
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-         *ngFor="let u of uploads(); trackBy: trackByKey">
+      *ngFor="let u of uploads(); trackBy: trackByKey">
       <!-- Card Header -->
       <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <div class="flex items-center">
-          <div class="w-10 h-10 bg-gradient-to-br from-slate-500 to-slate-700 rounded-lg flex items-center justify-center mr-3">
+          <div
+            class="w-10 h-10 bg-gradient-to-br from-slate-500 to-slate-700 rounded-lg flex items-center justify-center mr-3">
             <mat-icon class="text-white">description</mat-icon>
           </div>
           <div class="min-w-0">
@@ -137,23 +211,27 @@
             </div>
           </div>
         </div>
-        <span class="text-xs px-3 py-1 rounded-full"
-              [ngClass]="{
-                'bg-emerald-50 text-emerald-700 border border-emerald-200':
-                  u.status?.status==='validated' || u.status?.status==='processed',
-                'bg-rose-50 text-rose-700 border border-rose-200':
-                  u.status?.status==='invalid' || u.status?.status==='failed',
-                'bg-gray-100 text-gray-700 border border-gray-200': !u.status
-              }">
-          {{ u.status?.status || 'uploading' }}
-        </span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs px-3 py-1 rounded-full" [ngClass]="{
+                  'bg-emerald-50 text-emerald-700 border border-emerald-200':
+                    u.status?.status==='validated' || u.status?.status==='processed',
+                  'bg-rose-50 text-rose-700 border border-rose-200':
+                    u.status?.status==='invalid' || u.status?.status==='failed',
+                  'bg-gray-100 text-gray-700 border border-gray-200': !u.status
+                }">
+            {{ u.status?.status || 'uploading' }}
+          </span>
+          <button mat-icon-button (click)="closeUpload(u.key)"
+            class="!w-8 !h-8 !text-gray-400 hover:!text-gray-600 hover:!bg-gray-100" matTooltip="Close">
+            <mat-icon class="!text-lg">close</mat-icon>
+          </button>
+        </div>
       </div>
 
       <!-- Progress -->
       <div *ngIf="!u.status" class="px-6 py-4">
         <div class="w-full bg-gray-200 rounded-full h-2">
-          <div class="h-2 rounded-full bg-blue-500 transition-all duration-500"
-               [style.width.%]="u.progress"></div>
+          <div class="h-2 rounded-full bg-blue-500 transition-all duration-500" [style.width.%]="u.progress"></div>
         </div>
         <div class="text-xs text-gray-500 mt-2">{{ u.progress }}%</div>
       </div>
@@ -167,36 +245,45 @@
 
       <!-- KPIs -->
       <div *ngIf="u.dashboard?.ok" class="px-6 pt-4 grid grid-cols-2 lg:grid-cols-3 gap-3">
-        <div *ngIf="u.dashboard?.kpis?.revenue !== undefined"
-             class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div *ngIf="u.dashboard?.kpis?.revenue !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div class="text-xs text-gray-500">Revenue</div>
           <div class="text-lg font-semibold text-gray-900">{{ formatMYR(u.dashboard?.kpis?.revenue || 0) }}</div>
         </div>
         <div *ngIf="u.dashboard?.kpis?.units_sold !== undefined"
-             class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          class="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div class="text-xs text-gray-500">Units Sold</div>
           <div class="text-lg font-semibold text-gray-900">{{ u.dashboard?.kpis?.units_sold || 0 }}</div>
         </div>
-        <div *ngIf="u.dashboard?.kpis?.orders !== undefined"
-             class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div *ngIf="u.dashboard?.kpis?.orders !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div class="text-xs text-gray-500">Orders</div>
           <div class="text-lg font-semibold text-gray-900">{{ u.dashboard?.kpis?.orders || 0 }}</div>
         </div>
-        <div *ngIf="u.dashboard?.kpis?.aov !== undefined"
-             class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div *ngIf="u.dashboard?.kpis?.aov !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div class="text-xs text-gray-500">AOV</div>
           <div class="text-lg font-semibold text-gray-900">{{ formatMYR(u.dashboard?.kpis?.aov || 0) }}</div>
         </div>
-        <div *ngIf="u.dashboard?.kpis?.cogs !== undefined"
-             class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div *ngIf="u.dashboard?.kpis?.cogs !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div class="text-xs text-gray-500">COGS</div>
           <div class="text-lg font-semibold text-gray-900">{{ formatMYR(u.dashboard?.kpis?.cogs || 0) }}</div>
+        </div>
+        <div *ngIf="u.dashboard?.kpis?.unique_customers !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <div class="text-xs text-gray-500">Unique Customers</div>
+          <div class="text-lg font-semibold text-gray-900">{{ u.dashboard?.kpis?.unique_customers || 0 }}</div>
+        </div>
+        <div *ngIf="u.dashboard?.kpis?.new_customers !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <div class="text-xs text-gray-500">New Customers</div>
+          <div class="text-lg font-semibold text-gray-900">{{ u.dashboard?.kpis?.new_customers || 0 }}</div>
+        </div>
+        <div *ngIf="u.dashboard?.kpis?.repeat_customers !== undefined" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <div class="text-xs text-gray-500">Repeat Customers</div>
+          <div class="text-lg font-semibold text-gray-900">{{ u.dashboard?.kpis?.repeat_customers || 0 }}</div>
         </div>
       </div>
 
       <!-- Chart -->
       <div *ngIf="u.dashboard?.ok" class="px-6 pt-4">
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-dashed border-blue-200 flex items-center justify-center">
+        <div
+          class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-dashed border-blue-200 flex items-center justify-center">
           <canvas [id]="u.chartId" height="300" class="w-full"></canvas>
         </div>
       </div>
@@ -216,7 +303,8 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let r of (u.dashboard?.sales_trend || [])" class="odd:bg-white even:bg-gray-50">
+                <tr *ngFor="let r of sortByRevenueDesc(u.dashboard?.sales_trend || [])"
+                  class="odd:bg-white even:bg-gray-50">
                   <td class="px-3 py-2 border-b text-sm text-gray-800">{{ r.date }}</td>
                   <td class="px-3 py-2 border-b text-sm text-gray-800">{{ formatMYR(r.revenue) }}</td>
                   <td class="px-3 py-2 border-b text-sm text-gray-800">{{ r.units }}</td>
@@ -234,13 +322,16 @@
               <thead class="bg-gray-50">
                 <tr>
                   <th class="text-left text-xs font-medium text-gray-600 px-3 py-2 border-b">Item</th>
+                  <th class="text-left text-xs font-medium text-gray-600 px-3 py-2 border-b">Name</th>
                   <th class="text-left text-xs font-medium text-gray-600 px-3 py-2 border-b">Revenue</th>
                   <th class="text-left text-xs font-medium text-gray-600 px-3 py-2 border-b">Units</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let t of (u.dashboard?.top_items || [])" class="odd:bg-white even:bg-gray-50">
+                <tr *ngFor="let t of sortByUnitsDesc(u.dashboard?.top_items || [])"
+                  class="odd:bg-white even:bg-gray-50">
                   <td class="px-3 py-2 border-b text-sm text-gray-800">{{ t.item_id }}</td>
+                  <td class="px-3 py-2 border-b text-sm text-gray-800">{{ t.item_name }}</td>
                   <td class="px-3 py-2 border-b text-sm text-gray-800">{{ formatMYR(t.revenue) }}</td>
                   <td class="px-3 py-2 border-b text-sm text-gray-800">{{ t.units }}</td>
                 </tr>
@@ -248,6 +339,43 @@
             </table>
           </div>
         </div>
+
+        <!-- Top Customers -->
+        <div *ngIf="u.dashboard?.top_customers?.length">
+          <h4 class="text-sm font-semibold text-gray-900 mb-3">Top Customers</h4>
+          <div class="overflow-auto border border-gray-200 rounded-lg">
+            <table class="min-w-full border-collapse">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="text-left text-xs font-medium text-gray-600 px-3 py-2 border-b">Customer ID</th>
+                  <th class="text-left text-xs font-medium text-gray-600 px-3 py-2 border-b">Name</th>
+                  <th class="text-left text-xs font-medium text-gray-600 px-3 py-2 border-b">Revenue</th>
+                  <th class="text-left text-xs font-medium text-gray-600 px-3 py-2 border-b">Orders</th>
+                  <th class="text-left text-xs font-medium text-gray-600 px-3 py-2 border-b">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of u.dashboard?.top_customers || []" class="odd:bg-white even:bg-gray-50">
+                  <td class="px-3 py-2 border-b text-sm text-gray-800">{{ c.customer_id }}</td>
+                  <td class="px-3 py-2 border-b text-sm text-gray-800">{{ c.customer_name }}</td>
+                  <td class="px-3 py-2 border-b text-sm text-gray-800">{{ formatMYR(c.revenue) }}</td>
+                  <td class="px-3 py-2 border-b text-sm text-gray-800">{{ c.orders }}</td>
+                  <td class="px-3 py-2 border-b text-sm">
+                    <button 
+                      mat-mini-fab 
+                      color="primary"
+                      (click)="openCustomerInsight(c.customer_id)"
+                      class="!w-8 !h-8 !text-xs"
+                      matTooltip="View Customer Insights">
+                      <mat-icon class="!text-sm">person_search</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
 
       <div *ngIf="u.dashboard?.csv_type === 'inventory'" class="p-6">

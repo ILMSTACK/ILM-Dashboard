@@ -34,7 +34,7 @@ export class AuthService {
     // Hardcoded credentials for demo
     const validCredentials = {
       email: 'admin@gmail.com',
-      password: 'password123'
+      password: '1234'
     };
 
     return new Observable(observer => {

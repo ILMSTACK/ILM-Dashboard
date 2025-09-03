@@ -1,0 +1,87 @@
+// Email Campaign Component Styles
+
+.campaign-template-card {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.campaign-card {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.campaign-icon {
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+}
+
+// Campaign type colors
+.campaign-loyalty {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.campaign-promotion {
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+}
+
+.campaign-winback {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+.campaign-event {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+// Status badges
+.status-sent {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-draft {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-scheduled {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+// Modal styles
+.modal-overlay {
+  backdrop-filter: blur(4px);
+}
+
+.campaign-form {
+  .form-field {
+    transition: border-color 0.2s ease-in-out;
+    
+    &:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+    }
+  }
+}
+
+// Template grid
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+// Action buttons
+.action-button {
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
