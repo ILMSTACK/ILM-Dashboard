@@ -209,18 +209,26 @@ export class CampaignsComponent implements OnInit {
     if (!this.isValidCampaignForm()) return;
     
     if (type === 'custom') {
-      this.api.sendCustomEmail({
+      const customer = this.preSelectedCustomer();
+      const emailData: any = {
         subject: form.subject,
         body: form.body,
         segment: form.segment || 'all',
         sender_name: 'Your Business'
-      }).subscribe({
+      };
+      
+      // If we have a pre-selected customer and using individual segment, add customer_id
+      if (customer && form.segment === 'individual') {
+        emailData.customer_id = customer.id;
+      }
+      
+      this.api.sendCustomEmail(emailData).subscribe({
         next: (response) => {
           if (response.ok) {
             const customer = this.preSelectedCustomer();
             const message = customer 
               ? `Personal email sent to ${customer.name}!`
-              : `Email sent successfully to ${response.target_customers} customers!`;
+              : `Email sent successfully to ${response.targeted_customers} customers!`;
             alert(message);
             this.closeCampaignBuilder();
             this.loadEmailCampaigns();

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +11,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+
+import { CustomerInsightModalComponent } from './customer-insight-modal.component';
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -42,6 +47,32 @@ type UploadView = {
   chart?: Chart | null;
 };
 
+interface CustomerInsightData {
+  ok: boolean;
+  customer: {
+    customer_id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    first_purchase_date: string;
+    last_purchase_date: string;
+    total_orders: number;
+    total_spent: number;
+    average_order_value: number;
+    days_since_last_purchase: number;
+    created_at: string;
+    recent_purchases: Array<{
+      invoice_id: string;
+      invoice_date: string;
+      item_name: string;
+      qty: number;
+      revenue: number;
+    }>;
+  };
+  insight: string;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -49,13 +80,14 @@ type UploadView = {
     CommonModule, FormsModule,
     MatIconModule, MatButtonModule, MatCardModule,
     MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule,
-    MatInputModule, MatProgressBarModule, MatMenuModule],
+    MatInputModule, MatProgressBarModule, MatTooltipModule, MatMenuModule, MatDialogModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private api = inject(InsightCsvService);
   private csvApi = inject(CsvService);
+  private dialog = inject(MatDialog);
 
   // ======== Batch & DnD state ========
   uploads = signal<UploadView[]>([]);
@@ -289,7 +321,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.insightError.set('');
     this.insightText.set('');
     this.insightLoading.set(true);
-    this.api.insightBatch(this.batchId()).subscribe({
+    this.api.insightBatch().subscribe({
       next: (res) => {
         this.insightLoading.set(false);
         if (!res.ok) { this.insightError.set(res.error || 'Batch insight error'); return; }
@@ -396,9 +428,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     id: number;
     csv_type: string;
     status: string;
-    original_filename: string;
+    filename: string;
   }>>([]);
   previousUploadsLoading = signal(false);
+  loadingUploadId = signal<number | null>(null);
 
   // Download chosen template directly
   downloadTemplate(type: CsvType) {
@@ -787,6 +820,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   onPreviousUploadClick(upload: any) {
+    // Set loading state
+    this.loadingUploadId.set(upload.id);
+
     // Create a new upload view for the clicked previous upload
     const key = this.genKey('previous');
     const chartId = `chart-${key}`;
@@ -794,7 +830,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     // Add to current uploads display
     const uploadView: UploadView = {
       key,
-      fileName: upload.original_filename,
+      fileName: upload.filename,
       type: upload.csv_type as CsvType,
       progress: 100,
       uploadId: upload.id,
@@ -842,8 +878,84 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Formatting / trackBy
+  closeUpload(key: string) {
+    // Find and destroy chart before removing
+    const upload = this.uploads().find(u => u.key === key);
+    if (upload?.chart) {
+      try {
+        upload.chart.destroy();
+      } catch (e) {
+        console.warn('Error destroying chart:', e);
+      }
+    }
+
+    // Remove upload from the list
+    this.uploads.update(current => current.filter(u => u.key !== key));
+  }
+
+  // Formatting / trackBy / Sorting
   formatMYR(value: number) { return new Intl.NumberFormat('ms-MY', { style: 'currency', currency: 'MYR' }).format(value); }
   trackByKey(_i: number, u: UploadView) { return u.key; }
   trackByUploadId(_i: number, u: any) { return u.id; }
+
+  sortByUnitsDesc(items: any[]) {
+    return [...items].sort((a, b) => b.units - a.units);
+  }
+
+  sortByRevenueDesc(items: any[]) {
+    return [...items].sort((a, b) => b.revenue - a.revenue);
+  }
+
+  // Customer insight modal functionality
+  openCustomerInsight(customerId: string): void {
+    // Open modal immediately with loading state
+    const dialogRef = this.dialog.open(CustomerInsightModalComponent, {
+      width: '800px',
+      maxWidth: '95vw',
+      data: null, // Start with null to show loading
+      disableClose: false
+    });
+
+    // Fetch both customer details and insight
+    Promise.all([
+      firstValueFrom(this.api.getCustomer(customerId)).catch(() => null),
+      firstValueFrom(this.api.getCustomerInsight(customerId))
+    ]).then(([customerDetails, insightResponse]) => {
+      if (insightResponse?.ok) {
+        // Merge the data (customerDetails might be null if API call failed)
+        const mergedData = {
+          ok: true,
+          customer: {
+            ...insightResponse.customer,
+            ...(customerDetails ? {
+              email: customerDetails.email,
+              phone: customerDetails.phone,
+              address: customerDetails.address,
+              first_purchase_date: customerDetails.first_purchase_date,
+              last_purchase_date: customerDetails.last_purchase_date,
+              average_order_value: customerDetails.average_order_value,
+              days_since_last_purchase: customerDetails.days_since_last_purchase,
+              created_at: customerDetails.created_at,
+              recent_purchases: customerDetails.recent_purchases
+            } : {})
+          },
+          insight: insightResponse.insight
+        };
+        dialogRef.componentInstance.data = mergedData;
+      } else {
+        dialogRef.componentInstance.data = {
+          ok: false,
+          customer: {} as any,
+          insight: ''
+        };
+      }
+    }).catch((error) => {
+      console.error('Failed to load customer data:', error);
+      dialogRef.componentInstance.data = {
+        ok: false,
+        customer: {} as any,
+        insight: ''
+      };
+    });
+  }
 }

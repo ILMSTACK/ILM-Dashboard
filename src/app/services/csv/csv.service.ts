@@ -27,7 +27,7 @@ export class CsvService {
       id: number;
       csv_type: string;
       status: string;
-      original_filename: string;
+      filename: string;
     }>>(`${this.base}/upload-ids`, {
       headers: { 'accept': 'application/json' }
     });

@@ -2,6 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +12,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+
+import { CustomerInsightModalComponent } from '../home/customer-insight-modal.component';
 
 import {
   CsvService, Customer, CustomerMetrics
@@ -23,7 +27,7 @@ import {
     CommonModule, FormsModule,
     MatIconModule, MatButtonModule, MatCardModule,
     MatFormFieldModule, MatProgressSpinnerModule,
-    MatInputModule, MatTooltipModule, MatTabsModule
+    MatInputModule, MatTooltipModule, MatTabsModule, MatDialogModule
   ],
   templateUrl: './customers.component.html',
   styleUrls: ['./customers.component.scss']
@@ -31,13 +35,14 @@ import {
 export class CustomersComponent implements OnInit {
   private api = inject(CsvService);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   // Customer Data
   customers = signal<Customer[]>([]);
   customerMetrics = signal<CustomerMetrics | null>(null);
   customersLoading = signal(false);
-  selectedCustomerSegment = signal<'all' | 'high_value' | 'loyal' | 'frequent' | 'at_risk'>('all');
-  
+  selectedCustomerSegment = signal<'all' | 'high_value' | 'loyal'>('all');
+
   // UI State
   showCustomerProfile = signal(false);
   selectedCustomer = signal<Customer | null>(null);
@@ -60,7 +65,7 @@ export class CustomersComponent implements OnInit {
     if (this.customersLoading()) return;
     this.customersLoading.set(true);
     const segment = this.selectedCustomerSegment();
-    
+
     if (segment === 'all') {
       this.api.getCustomers(1, 50, 'all', this.searchQuery()).subscribe({
         next: (response: any) => {
@@ -87,7 +92,7 @@ export class CustomersComponent implements OnInit {
             total_spent: c.total_spent,
             created_at: c.last_purchase
           })) as Customer[];
-          
+
           this.customers.set(segmentCustomers);
           this.customersLoading.set(false);
         },
@@ -100,7 +105,7 @@ export class CustomersComponent implements OnInit {
   }
 
   // ======== UI Interaction Methods ========
-  selectCustomerSegment(segment: 'all' | 'high_value' | 'loyal' | 'frequent' | 'at_risk') {
+  selectCustomerSegment(segment: 'all' | 'high_value' | 'loyal') {
     this.selectedCustomerSegment.set(segment);
     this.customers.set([]);
     this.loadCustomers();
@@ -121,7 +126,7 @@ export class CustomersComponent implements OnInit {
       },
       error: (e) => {
         console.error('Failed to load customer profile:', e);
-        alert('Failed to load customer profile');
+        // Could show a toast or snackbar here instead of alert
       }
     });
   }
@@ -132,22 +137,60 @@ export class CustomersComponent implements OnInit {
   }
 
   viewCustomerInsight(customerId: string) {
-    this.api.getCustomerInsight(customerId).subscribe({
-      next: (response) => {
-        if (response.ok) {
-          alert(`AI Insight for ${response.customer.name}:\n\n${response.insight}`);
-        }
-      },
-      error: (e) => {
-        console.error('Failed to generate customer insight:', e);
-        alert('Failed to generate customer insight');
+    // Open modal immediately with loading state
+    const dialogRef = this.dialog.open(CustomerInsightModalComponent, {
+      width: '800px',
+      maxWidth: '95vw',
+      data: null, // Start with null to show loading
+      disableClose: false
+    });
+
+    // Fetch both customer details and insight
+    Promise.all([
+      firstValueFrom(this.api.getCustomer(customerId)).catch(() => null),
+      firstValueFrom(this.api.getCustomerInsight(customerId))
+    ]).then(([customerDetails, insightResponse]) => {
+      if (insightResponse?.ok) {
+        // Merge the data (customerDetails might be null if API call failed)
+        const mergedData = {
+          ok: true,
+          customer: {
+            ...insightResponse.customer,
+            ...(customerDetails ? {
+              email: customerDetails.email,
+              phone: customerDetails.phone,
+              address: customerDetails.address,
+              first_purchase_date: customerDetails.first_purchase_date,
+              last_purchase_date: customerDetails.last_purchase_date,
+              average_order_value: customerDetails.average_order_value,
+              days_since_last_purchase: customerDetails.days_since_last_purchase,
+              created_at: customerDetails.created_at,
+              recent_purchases: customerDetails.recent_purchases
+            } : {})
+          },
+          insight: insightResponse.insight
+        };
+        dialogRef.componentInstance.data = mergedData;
+      } else {
+        dialogRef.componentInstance.data = {
+          ok: false,
+          customer: {} as any,
+          insight: ''
+        };
       }
+    }).catch((error) => {
+      console.error('Failed to load customer data:', error);
+      dialogRef.componentInstance.data = {
+        ok: false,
+        customer: {} as any,
+        insight: ''
+      };
     });
   }
 
   createCustomerCampaign(customer: Customer) {
     // Navigate to email campaigns with customer pre-selected
-    this.router.navigate(['/admin/campaigns'], { 
+    this.router.navigate(['/admin/campaigns'], {
       queryParams: { customerId: customer.customer_id, customerName: customer.name }
     });
   }
@@ -161,7 +204,7 @@ export class CustomersComponent implements OnInit {
   getCustomerValueBadge(customer: Customer): string {
     const spent = customer.total_spent;
     const orders = customer.total_orders;
-    
+
     if (orders >= 5 && spent >= 1000) {
       return 'bg-purple-100 text-purple-800 border border-purple-200';
     } else if (spent >= 1000) {
@@ -175,7 +218,7 @@ export class CustomersComponent implements OnInit {
   getCustomerValueLabel(customer: Customer): string {
     const spent = customer.total_spent;
     const orders = customer.total_orders;
-    
+
     if (orders >= 5 && spent >= 1000) {
       return 'VIP';
     } else if (spent >= 1000) {
@@ -201,7 +244,7 @@ export class CustomersComponent implements OnInit {
     return new Intl.NumberFormat('ms-MY', { style: 'currency', currency: 'MYR' }).format(value);
   }
 
-  trackByCustomerId(_i: number, c: Customer) { 
-    return c.customer_id; 
+  trackByCustomerId(_i: number, c: Customer) {
+    return c.customer_id;
   }
 }

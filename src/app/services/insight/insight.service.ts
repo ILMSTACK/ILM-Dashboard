@@ -33,8 +33,8 @@ export interface DashboardResponse {
     cogs?: number;
     unique_customers?: number; new_customers?: number; repeat_customers?: number;
   };
-  sales_trend?: Array<{ date: string; revenue: number; units: number }>;
-  top_items?: Array<{ item_id: string; revenue: number; units: number }>;
+  sales_trend?: Array<{ date: string; item_name:string; revenue: number; units: number }>;
+  top_items?: Array<{ item_id: string; item_name:string; revenue: number; units: number }>;
   top_customers?: Array<{ customer_id: string; customer_name: string; revenue: number; orders: number }>;
   customer_segments?: {
     high_value: number;
@@ -167,7 +167,10 @@ export interface PaginatedResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class CsvService {
   private http = inject(HttpClient);
-  private base = ((environment as any).CSV_BASE ?? '/csv').replace(/\/+$/, '');
+  private api = environment.API_URL.replace(/\/+$/, ''); // strip trailing slash
+  private tempBase = (environment as any).CSV_BASE ?? '/csv';
+
+  private base = `${this.api}${this.tempBase.startsWith('/') ? this.tempBase : '/' + this.tempBase}`;
 
   // ------- Templates -------
   downloadTemplate(ctype: CsvType) {
@@ -305,9 +308,12 @@ export class CsvService {
     return this.http.post<PairInsightResponse>(`${this.base}/insight/pair`, {}, { params });
   }
 
-  insightBatch<T = any>(batchId: string) {
-    const params = new HttpParams().set('batch_id', batchId);
-    return this.http.post<BatchInsightResponse<T>>(`${this.base}/insight/batch`, {}, { params });
+  // insightBatch<T = any>(batchId: string) {
+  //   const params = new HttpParams().set('batch_id', batchId);
+  //   return this.http.post<BatchInsightResponse<T>>(`${this.base}/insight/batch`, {}, { params });
+  // }
+  insightBatch() {
+    return this.http.get<any>(`${this.base}/getInsight`);
   }
 
   listUploads(batchId: string) {
@@ -319,7 +325,7 @@ export class CsvService {
       batch_id: string | null;
       created_at: string;
       validated_at: string | null;
-      original_filename: string;
+      filename: string;
     }>>(`${this.base}/uploads`, { params: new HttpParams().set('batch_id', batchId) });
   }
 
@@ -333,7 +339,7 @@ export class CsvService {
       batch_id: string | null;
       created_at: string;
       validated_at: string | null;
-      original_filename: string;
+      filename: string;
       format?: 'original' | 'enhanced';
     }>>(`${this.base}/upload-ids`);
   }
@@ -359,7 +365,7 @@ export class CsvService {
     return this.http.get<PaginatedResponse<CustomerPurchase>>(`${this.base}/customers/${customerId}/purchases`, { params });
   }
 
-  getCustomerSegment(segmentType: 'loyal' | 'high_value' | 'frequent' | 'at_risk') {
+  getCustomerSegment(segmentType: 'loyal' | 'high_value') {
     return this.http.get<CustomerSegment>(`${this.base}/customers/segments/${segmentType}`);
   }
 
@@ -403,11 +409,11 @@ export class CsvService {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('per_page', perPage.toString());
-    return this.http.get<PaginatedResponse<EmailCampaign>>('/email/campaigns', { params });
+    return this.http.get<PaginatedResponse<EmailCampaign>>(`${this.api}/email/campaigns`, { params });
   }
 
   getCampaignStats(campaignId: number) {
-    return this.http.get<CampaignStats>(`/email/campaigns/${campaignId}/stats`);
+    return this.http.get<CampaignStats>(`${this.api}/email/campaigns/${campaignId}/stats`);
   }
 
   createLoyaltyCampaign(data: {
@@ -426,7 +432,7 @@ export class CsvService {
       subject: string;
       campaign_type: string;
       status: string;
-    }>('/email/loyalty-promotion', data);
+    }>(`${this.api}/email/loyalty-promotion`, data);
   }
 
   createProductPromotion(data: {
@@ -444,7 +450,7 @@ export class CsvService {
       subject: string;
       campaign_type: string;
       status: string;
-    }>('/email/product-promotion', data);
+    }>(`${this.api}/email/product-promotion`, data);
   }
 
   createWinBackCampaign(data: {
@@ -461,29 +467,26 @@ export class CsvService {
       subject: string;
       campaign_type: string;
       status: string;
-    }>('/email/win-back', data);
+    }>(`${this.api}/email/win-back`, data);
   }
 
   sendCustomEmail(data: {
     subject: string;
     body: string;
-    segment: string;
+    segment?: 'all' | 'loyal' | 'high_value' | 'frequent' | 'at_risk' | 'individual';
+    product_filter?: string;
     sender_name?: string;
+    customer_id?: string;
+    customer_email?: string;
   }) {
     return this.http.post<{
       ok: boolean;
-      campaign_id: number;
-      campaign_name: string;
-      subject: string;
+      sent_count: number;
+      targeted_customers: number;
+      failed_count: number;
       segment: string;
-      target_customers: number;
-      send_result: {
-        campaign_id: number;
-        sent_count: number;
-        failed_count: number;
-        total_recipients: number;
-      };
-    }>('/email/send-custom', data);
+      sent_at: string;
+    }>(`${this.api}/email/send-custom`, data);
   }
 
   sendCampaign(campaignId: number) {
@@ -493,6 +496,6 @@ export class CsvService {
       sent_count: number;
       failed_count: number;
       total_recipients: number;
-    }>(`/email/send/${campaignId}`, {});
+    }>(`${this.api}/email/send/${campaignId}`, {});
   }
 }

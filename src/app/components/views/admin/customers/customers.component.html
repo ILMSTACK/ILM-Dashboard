@@ -117,29 +117,7 @@
         </span>
       </button>
       
-      <button mat-stroked-button 
-              [class.!bg-cyan-100]="selectedCustomerSegment() === 'frequent'"
-              [class.!border-cyan-300]="selectedCustomerSegment() === 'frequent'"
-              (click)="selectCustomerSegment('frequent')"
-              class="!text-sm">
-        <mat-icon class="!text-sm mr-2">trending_up</mat-icon>
-        Active Buyers
-        <span class="ml-2 px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-          {{ selectedCustomerSegment() === 'frequent' ? customers().length : '?' }}
-        </span>
-      </button>
-      
-      <button mat-stroked-button 
-              [class.!bg-orange-100]="selectedCustomerSegment() === 'at_risk'"
-              [class.!border-orange-300]="selectedCustomerSegment() === 'at_risk'"
-              (click)="selectCustomerSegment('at_risk')"
-              class="!text-sm">
-        <mat-icon class="!text-sm mr-2">warning</mat-icon>
-        Need Attention
-        <span class="ml-2 px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-          {{ selectedCustomerSegment() === 'at_risk' ? customers().length : '?' }}
-        </span>
-      </button>
+
     </div>
   </div>
 
@@ -149,8 +127,7 @@
       <h3 class="text-lg font-semibold text-gray-900">
         {{ selectedCustomerSegment() === 'all' ? 'All Customers' : 
            selectedCustomerSegment() === 'high_value' ? 'VIP Customers' :
-           selectedCustomerSegment() === 'loyal' ? 'Loyal Customers' :
-           selectedCustomerSegment() === 'frequent' ? 'Active Buyers' : 'Customers Need Attention' }}
+           selectedCustomerSegment() === 'loyal' ? 'Loyal Customers' : 'Customer Segment' }}
       </h3>
     </div>
 
